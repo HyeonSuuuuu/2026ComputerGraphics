@@ -1,0 +1,10 @@
+Alpha 123 beta45 gamma
+data-set 2024 file/name test
+hello   world   77   ok
+C++ module 20 test-case
+item1 item2   item3 item4
+route 66 north/south road
+2025-09-09 report v2 final
+abc DEF 999 ghi_jkl
+x*y z/w 3.14 value
+end of file 10 lines

@@ -1,0 +1,88 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Research\\ComputerGraphics\\Warmup\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B6BBBFBA-EF41-48D8-9A26-1DFDE8410916}|Warmup2\\Warmup2.vcxproj|C:\\Research\\ComputerGraphics\\Warmup\\Warmup2\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{B6BBBFBA-EF41-48D8-9A26-1DFDE8410916}|Warmup2\\Warmup2.vcxproj|solutionrelative:Warmup2\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B6BBBFBA-EF41-48D8-9A26-1DFDE8410916}|Warmup2\\Warmup2.vcxproj|C:\\Research\\ComputerGraphics\\Warmup\\Warmup2\\Warmup2.ixx||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{B6BBBFBA-EF41-48D8-9A26-1DFDE8410916}|Warmup2\\Warmup2.vcxproj|solutionrelative:Warmup2\\Warmup2.ixx||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6B8FD5BA-2EE5-4B60-89DC-25C60E2D1B0B}|Warmup\\Warmup.vcxproj|C:\\Research\\ComputerGraphics\\Warmup\\Warmup\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{6B8FD5BA-2EE5-4B60-89DC-25C60E2D1B0B}|Warmup\\Warmup.vcxproj|solutionrelative:Warmup\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6B8FD5BA-2EE5-4B60-89DC-25C60E2D1B0B}|Warmup\\Warmup.vcxproj|C:\\Research\\ComputerGraphics\\Warmup\\Warmup\\Warmup1.ixx||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{6B8FD5BA-2EE5-4B60-89DC-25C60E2D1B0B}|Warmup\\Warmup.vcxproj|solutionrelative:Warmup\\Warmup1.ixx||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Research\\ComputerGraphics\\Warmup\\Warmup2\\main.cpp",
+              "RelativeDocumentMoniker": "Warmup2\\main.cpp",
+              "ToolTip": "C:\\Research\\ComputerGraphics\\Warmup\\Warmup2\\main.cpp",
+              "RelativeToolTip": "Warmup2\\main.cpp",
+              "ViewState": "AgIAALcAAAAAAAAAAAAAAMIAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-09-08T15:42:52.998Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Warmup1.ixx",
+              "DocumentMoniker": "C:\\Research\\ComputerGraphics\\Warmup\\Warmup\\Warmup1.ixx",
+              "RelativeDocumentMoniker": "Warmup\\Warmup1.ixx",
+              "ToolTip": "C:\\Research\\ComputerGraphics\\Warmup\\Warmup\\Warmup1.ixx",
+              "RelativeToolTip": "Warmup\\Warmup1.ixx",
+              "ViewState": "AgIAAJMAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001913|",
+              "WhenOpened": "2026-09-08T15:37:04.524Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Warmup2.ixx",
+              "DocumentMoniker": "C:\\Research\\ComputerGraphics\\Warmup\\Warmup2\\Warmup2.ixx",
+              "RelativeDocumentMoniker": "Warmup2\\Warmup2.ixx",
+              "ToolTip": "C:\\Research\\ComputerGraphics\\Warmup\\Warmup2\\Warmup2.ixx",
+              "RelativeToolTip": "Warmup2\\Warmup2.ixx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001913|",
+              "WhenOpened": "2026-09-08T15:51:44.723Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Research\\ComputerGraphics\\Warmup\\Warmup\\main.cpp",
+              "RelativeDocumentMoniker": "Warmup\\main.cpp",
+              "ToolTip": "C:\\Research\\ComputerGraphics\\Warmup\\Warmup\\main.cpp",
+              "RelativeToolTip": "Warmup\\main.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-09-08T15:39:34.09Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

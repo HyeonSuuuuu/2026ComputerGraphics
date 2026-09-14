@@ -1,0 +1,10 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\research\\computergraphics\\warmup\\warmup\\warmup2.ixx",
+        "ProvidedModule": "Warmup2",
+        "Includes": [],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
