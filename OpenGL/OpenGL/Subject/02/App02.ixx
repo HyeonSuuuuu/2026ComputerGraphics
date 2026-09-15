@@ -49,26 +49,17 @@ export namespace hs
 			if (input.IsKeyPressed(GLFW_KEY_EQUAL) || input.IsKeyPressed(GLFW_KEY_KP_ADD))
 			{
 				if (_selection)
-				{
-					size_t index = _selection->zone;
-					_zones[index].ResizeItem(_selection->item, 0.1f);
-				}
+					_zones[_selection->zone].ResizeItem(_selection->item, 0.1f);
 			}
 			if (input.IsKeyPressed(GLFW_KEY_MINUS) || input.IsKeyPressed(GLFW_KEY_KP_SUBTRACT))
 			{
 				if (_selection)
-				{
-					size_t index = _selection->zone;
-					_zones[index].ResizeItem(_selection->item, -0.1f);
-				}
+					_zones[_selection->zone].ResizeItem(_selection->item, -0.1f);
 			}
 			if (input.IsKeyPressed(GLFW_KEY_C))
 			{
 				if (_selection)
-				{
-					size_t index = _selection->zone;
-					_zones[index].RandomColorItem(_selection->item);
-				}
+					_zones[_selection->zone].RandomColorItem(_selection->item);
 			}
 			if (input.IsKeyPressed(GLFW_KEY_R))
 			{
@@ -84,7 +75,7 @@ export namespace hs
 			auto& renderer = GetRenderer();
 			for (std::size_t i = 0; i < _zones.size(); ++i)
 			{
-				std::optional<std::size_t> selectedItem;
+				std::optional<RectId> selectedItem;
 				if (_selection && _selection->zone == i)
 					selectedItem = _selection->item;
 				_zones[i].Draw(renderer, selectedItem);
@@ -96,7 +87,7 @@ export namespace hs
 		struct Selection
 		{
 			std::size_t zone;
-			std::size_t item;
+			RectId item;
 			bool operator==(const Selection&) const = default;
 		};
 

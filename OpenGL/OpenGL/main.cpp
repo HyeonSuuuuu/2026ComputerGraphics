@@ -2,14 +2,14 @@
 
 
 import std;
-import app02;
+import app03;
 
 
 int main()
 {
 	try
 	{
-		hs::App02 app(800, 600);
+		hs::App03 app(800, 600);
 		app.Run();
 	}
 	catch (const std::exception& e)

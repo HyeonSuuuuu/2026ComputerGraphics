@@ -4,6 +4,7 @@ import std;
 import hs.shape;
 import hs.renderer;
 import hs.random;
+import hs.rect_layer;
 
 export namespace hs
 {
@@ -12,86 +13,65 @@ export namespace hs
 	public:
 		Zone(Vec2 center, Vec2 size)
 			: _bg{ center, size, RandomColor() }
-			, _items {MakeItems(_bg)}
 		{}
-		
-		void Draw(IRenderer& renderer, std::optional<std::size_t> selectedItem = std::nullopt) const
+
+		void Draw(IRenderer& renderer, std::optional<RectId> selectedItem = std::nullopt) const
 		{
 			renderer.DrawRect(_bg);
-			for (auto i : std::views::iota(0uz, _visibleCount))
+			for (const auto& entry : _items.Entries())
 			{
-				if (i == selectedItem)
-					DrawSelected(renderer, _items[i]);
+				if (entry.id == selectedItem)
+					DrawSelected(renderer, entry.rect);
 				else
-					renderer.DrawRect(_items[i]);
+					renderer.DrawRect(entry.rect);
 			}
 		}
 
 		bool Contains(Vec2 p) const { return _bg.Contains(p); }
 
-		std::optional<std::size_t> ContainItem(Vec2 p) const
+		std::optional<RectId> ContainItem(Vec2 p) const
 		{
-			for (auto i : std::views::iota(0uz, _visibleCount) | std::views::reverse)
-				if (_items[i].Contains(p))
-					return i;
-			return std::nullopt;
+			// 배경 밖이면 아이템은 검사할 필요 없음
+			if (!_bg.Contains(p))
+				return std::nullopt;
+			return _items.HitTest(p);
 		}
 
 		bool AddItems()
 		{
-			if (_visibleCount >= _items.size())
+			if (_items.Size() >= MaxItemCount)
 				return false;
-			
-			++_visibleCount;
+
+			_items.Add(MakeItem(_bg));
 			return true;
 		}
-		
-		void ResizeItem(std::optional<std::size_t> selectedItem = std::nullopt, float delta = 0.1f)
+
+		void ResizeItem(RectId id, float delta)
 		{
-			if (selectedItem)
+			if (Rectangle* item = _items.Find(id))
 			{
-				size_t index = selectedItem.value();
-				Vec2& size = _items[index].size;
-				
-				size.x = std::clamp(size.x + delta, MinItemSize, _bg.size.x);
-				size.y = std::clamp(size.y + delta, MinItemSize, _bg.size.y);
+				item->size.x = std::clamp(item->size.x + delta, MinItemSize, _bg.size.x);
+				item->size.y = std::clamp(item->size.y + delta, MinItemSize, _bg.size.y);
 			}
 		}
-		
-		void RandomColorItem(std::optional<std::size_t> selectedItem = std::nullopt)
+
+		void RandomColorItem(RectId id)
 		{
-			if (selectedItem)
-			{
-				size_t index = selectedItem.value();
-				_items[index].color = RandomColor();
-			}
+			if (Rectangle* item = _items.Find(id))
+				item->color = RandomColor();
 		}
-		
+
 		void Init()
 		{
-			_visibleCount = 0;
 			_bg.color = RandomColor();
-			for (auto& item : _items)
-			{
-				float size = Random(MinItemSize, _bg.size.x);
-				item.size = { size, size };
-				item.color = RandomColor();
-				item.pos = _bg.pos;
-			}
+			_items.Clear();
 		}
-		
+
 	private:
-		static std::array<Rectangle, 5> MakeItems(const Rectangle& bg)
+		static Rectangle MakeItem(const Rectangle& bg)
 		{
-			std::array<Rectangle, 5> items;
-			for (auto& item : items)
-			{
-				float size = Random(MinItemSize, bg.size.x);
-				item.size = { size, size };
-				item.color = RandomColor();
-				item.pos = bg.pos;
-			}
-			return items;
+			float size = Random(MinItemSize, bg.size.x);
+			return { bg.pos, { size, size }, RandomColor() };
 		}
 
 		static void DrawSelected(IRenderer& renderer, const Rectangle& rect)
@@ -100,13 +80,13 @@ export namespace hs
 			renderer.DrawRect({ rect.pos, { rect.size.x - Border * 2, rect.size.y - Border * 2}, rect.color});
 		}
 
-		Rectangle					_bg;
-		std::array<Rectangle, 5>	_items;
-		std::size_t					_visibleCount{};
+		Rectangle	_bg;
+		RectLayer	_items;
 
+		static constexpr std::size_t MaxItemCount = 5;
 		static constexpr float Border = 0.02f;
 		static constexpr Color SelectedColor{ 1.f, 1.f, 0.f };
-		
+
 		static constexpr float MinItemSize = 0.01f;
 	};
 }

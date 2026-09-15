@@ -30,6 +30,12 @@ export namespace hs
 			return Left() <= other.Left() && other.Right() <= Right()
 				&& Bottom() <= other.Bottom() && other.Top() <= Top();
 		}
-		
+
+		// 모서리만 맞닿은 경우는 겹침으로 보지 않음
+		bool Intersects(const Rectangle& other) const
+		{
+			return Left() < other.Right() && other.Left() < Right()
+				&& Bottom() < other.Top() && other.Bottom() < Top();
+		}
 	};
 }
