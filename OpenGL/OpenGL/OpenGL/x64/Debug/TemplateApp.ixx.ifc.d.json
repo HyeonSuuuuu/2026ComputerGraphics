@@ -1,0 +1,49 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\research\\computergraphics\\opengl\\opengl\\templateapp.ixx",
+        "ProvidedModule": "module_name",
+        "Includes": [
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\um\\gl\\glew.h",
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\um\\gl\\glu.h",
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\shared\\winapifamily.h",
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\shared\\winpackagefamily.h",
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\um\\gl\\gl.h",
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\um\\gl\\glfw3.h",
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\ucrt\\stddef.h",
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\ucrt\\corecrt.h",
+            "c:\\program files\\microsoft visual studio\\18\\enterprise\\vc\\tools\\msvc\\14.50.35717\\include\\vcruntime.h",
+            "c:\\program files\\microsoft visual studio\\18\\enterprise\\vc\\tools\\msvc\\14.50.35717\\include\\sal.h",
+            "c:\\program files\\microsoft visual studio\\18\\enterprise\\vc\\tools\\msvc\\14.50.35717\\include\\concurrencysal.h",
+            "c:\\program files\\microsoft visual studio\\18\\enterprise\\vc\\tools\\msvc\\14.50.35717\\include\\vadefs.h",
+            "c:\\program files\\microsoft visual studio\\18\\enterprise\\vc\\tools\\msvc\\14.50.35717\\include\\stdint.h"
+        ],
+        "ImportedModules": [
+            {
+                "Name": "std",
+                "BMI": "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\OpenGL\\x64\\Debug\\microsoft\\STL\\std.ixx.ifc"
+            },
+            {
+                "Name": "hs",
+                "BMI": "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\OpenGL\\x64\\Debug\\lhs.ixx.ifc"
+            },
+            {
+                "Name": "hs.app",
+                "BMI": "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\OpenGL\\x64\\Debug\\App.ixx.ifc"
+            },
+            {
+                "Name": "hs.input",
+                "BMI": "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\OpenGL\\x64\\Debug\\Input.ixx.ifc"
+            },
+            {
+                "Name": "hs.random",
+                "BMI": "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\OpenGL\\x64\\Debug\\Random.ixx.ifc"
+            },
+            {
+                "Name": "hs.shape",
+                "BMI": "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\OpenGL\\x64\\Debug\\Shape.ixx.ifc"
+            }
+        ],
+        "ImportedHeaderUnits": []
+    }
+}

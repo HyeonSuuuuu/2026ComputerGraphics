@@ -1,0 +1,29 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "OpenGL\\Debug\\TemplateApp.ixx.obj",
+            "outputs": [
+                "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\OpenGL\\Debug\\vc145.pdb",
+                "OpenGL\\Debug\\",
+                "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\OpenGL\\Debug\\TemplateApp.ixx.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "app_name",
+                    "source-path": "c:\\research\\computergraphics\\opengl\\opengl\\template\\templateapp.ixx",
+                    "is-interface": true
+                }
+            ],
+            "requires": [
+                {
+                    "logical-name": "std"
+                },
+                {
+                    "logical-name": "hs"
+                }
+            ]
+        }
+    ]
+}

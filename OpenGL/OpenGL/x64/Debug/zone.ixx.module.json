@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "x64\\Debug\\Zone.ixx.obj",
+            "outputs": [
+                "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\x64\\Debug\\vc145.pdb",
+                "x64\\Debug\\",
+                "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\x64\\Debug\\Zone.ixx.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "hs.zone",
+                    "source-path": "c:\\research\\computergraphics\\opengl\\opengl\\subject\\two\\zone.ixx",
+                    "is-interface": true
+                }
+            ],
+            "requires": [
+                {
+                    "logical-name": "std"
+                },
+                {
+                    "logical-name": "hs.shape"
+                },
+                {
+                    "logical-name": "hs.renderer"
+                },
+                {
+                    "logical-name": "hs.random"
+                }
+            ]
+        }
+    ]
+}

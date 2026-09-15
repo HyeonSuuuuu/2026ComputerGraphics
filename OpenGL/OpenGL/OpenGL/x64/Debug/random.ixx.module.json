@@ -1,0 +1,26 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "OpenGL\\x64\\Debug\\Random.ixx.obj",
+            "outputs": [
+                "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\OpenGL\\x64\\Debug\\vc145.pdb",
+                "OpenGL\\x64\\Debug\\",
+                "C:\\Research\\ComputerGraphics\\OpenGL\\OpenGL\\OpenGL\\x64\\Debug\\Random.ixx.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "hs.random",
+                    "source-path": "c:\\research\\computergraphics\\opengl\\opengl\\random.ixx",
+                    "is-interface": true
+                }
+            ],
+            "requires": [
+                {
+                    "logical-name": "std"
+                }
+            ]
+        }
+    ]
+}

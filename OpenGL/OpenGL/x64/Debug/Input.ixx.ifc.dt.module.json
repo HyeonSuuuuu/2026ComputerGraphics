@@ -1,0 +1,29 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "x64\\Debug\\Input.obj",
+            "outputs": [
+                "x64\\Debug\\Input.ixx.ifc.dt.module.json",
+                "x64\\Debug\\Input.ixx.ifc.dt.d.json",
+                "x64\\Debug\\hs.input.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "hs.input",
+                    "source-path": "c:\\research\\computergraphics\\opengl\\opengl\\input.ixx",
+                    "is-interface": true
+                }
+            ],
+            "requires": [
+                {
+                    "logical-name": "std"
+                },
+                {
+                    "logical-name": "hs.shape"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "x64\\Debug\\FirstRenderer.obj",
+            "outputs": [
+                "x64\\Debug\\FirstRenderer.ixx.ifc.dt.module.json",
+                "x64\\Debug\\FirstRenderer.ixx.ifc.dt.d.json",
+                "x64\\Debug\\hs.first_renderer.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "hs.first_renderer",
+                    "source-path": "c:\\research\\computergraphics\\opengl\\opengl\\firstrenderer.ixx",
+                    "is-interface": true
+                }
+            ],
+            "requires": [
+                {
+                    "logical-name": "hs.shape"
+                },
+                {
+                    "logical-name": "hs.renderer"
+                }
+            ]
+        }
+    ]
+}

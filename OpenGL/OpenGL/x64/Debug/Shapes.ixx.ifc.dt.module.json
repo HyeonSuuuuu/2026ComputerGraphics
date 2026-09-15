@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "x64\\Debug\\Shapes.obj",
+            "outputs": [
+                "x64\\Debug\\Shapes.ixx.ifc.dt.module.json",
+                "x64\\Debug\\Shapes.ixx.ifc.dt.d.json",
+                "x64\\Debug\\shape.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "shape",
+                    "source-path": "c:\\research\\computergraphics\\opengl\\opengl\\shapes.ixx",
+                    "is-interface": true
+                }
+            ],
+            "requires": []
+        }
+    ]
+}
