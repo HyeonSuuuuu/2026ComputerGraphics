@@ -28,11 +28,14 @@ export namespace hs
 				SpawnRect();
 			if (input.IsMousePressed(GLFW_MOUSE_BUTTON_LEFT))
 				_dragging = _rects.HitTest(input.MousePos());
-			if (input.IsMouseReleased(GLFW_MOUSE_BUTTON_LEFT))
-				_dragging.reset();
 			if (_dragging)
 				DragRect(*_dragging, input.MouseDelta());
-
+			if (input.IsMouseReleased(GLFW_MOUSE_BUTTON_LEFT))
+			{
+				if (_dragging)
+					DropRect(*_dragging);
+				_dragging.reset();
+			}
 			if (input.IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT))
 				if (auto hit = _rects.HitTest(input.MousePos()))
 					SplitRect(*hit);
@@ -72,26 +75,34 @@ export namespace hs
 
 			rect->pos.x += delta.x;
 			rect->pos.y += delta.y;
-
+		}
+		
+		void DropRect(RectId id)
+		{
 			if (auto other = _rects.FindOverlap(id))
-				_dragging = MergeRects(id, *other);
+				MergeRects(id, *other);
 		}
 		
 		RectId MergeRects(RectId a, RectId b)
 		{
 			const Rectangle& ra = *_rects.Find(a);
 			const Rectangle& rb = *_rects.Find(b);
+			
+			float areaA = ra.size.x * ra.size.y;
+			float areaB = rb.size.x * rb.size.y;
+			float area = areaA + areaB;
+			
+			float aspect = (ra.size.x + rb.size.x) / (ra.size.y + rb.size.y);
+			float width = std::sqrt(area * aspect);
+			float height = area / width;
+			
+			Vec2 pos{
+				(ra.pos.x * areaA + rb.pos.x * areaB) / area,
+				(ra.pos.y * areaA + rb.pos.y * areaB) / area
+		};
 
-			float left   = std::min(ra.Left(),   rb.Left());
-			float right  = std::max(ra.Right(),  rb.Right());
-			float bottom = std::min(ra.Bottom(), rb.Bottom());
-			float top    = std::max(ra.Top(),    rb.Top());
-
-			Rectangle merged{
-				{ (left + right) / 2, (bottom + top) / 2 },
-				{ right - left, top - bottom },
-				RandomColor()
-			};
+			Rectangle merged{ pos, { width, height }, RandomColor() };
+			
 			
 			_rects.Remove(a);
 			_rects.Remove(b);
