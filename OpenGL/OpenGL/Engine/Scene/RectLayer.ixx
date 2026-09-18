@@ -2,11 +2,12 @@ export module hs.rect_layer;
 
 import std;
 import hs.shape;
+import hs.entity;
 
 export namespace hs
 {
-	using RectId = std::uint32_t;
-	
+	using RectId = EntityId;
+
 	class RectLayer
 	{
 	public:
@@ -15,14 +16,23 @@ export namespace hs
 			RectId id;
 			Rectangle rect;
 		};
-		
+
+		// 저장소가 직접 ID를 발급한다. World 없이 단독으로 쓸 때의 경로
 		RectId Add(const Rectangle& rect)
 		{
 			RectId id = _nextId++;
 			_entries.push_back({ id, rect });
 			return id;
 		}
-		
+
+		// World 등 바깥에서 발급한 ID로 추가한다
+		void Add(RectId id, const Rectangle& rect)
+		{
+			_entries.push_back({ id, rect });
+			if (id >= _nextId)			// 내부 발급과 번호가 겹치지 않게 밀어 둔다
+				_nextId = id + 1;
+		}
+
 		bool Remove(RectId id)
 		{
 			auto it = FindEntry(id);

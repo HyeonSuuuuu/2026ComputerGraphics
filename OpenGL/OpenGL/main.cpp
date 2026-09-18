@@ -3,16 +3,13 @@
 
 import std;
 
-import app01;
-import app02;
-import app03;
-
+import app04;
 
 int main()
 {
 	try
 	{
-		hs::App03 app(800, 600);
+		hs::App04 app(800, 600);
 		app.Run();
 	}
 	catch (const std::exception& e)
