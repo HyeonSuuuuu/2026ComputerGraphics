@@ -15,15 +15,13 @@ export namespace hs
 
 		Vec2 Value() const { return dir * speed; }
 	};
-
-	// dir은 정규화되어 있거나 0이어야 한다. assert에서 쓴다
+	
 	bool IsValidDirection(Vec2 dir)
 	{
 		float lenSq = LengthSq(dir);
 		return lenSq == 0.f || std::abs(lenSq - 1.f) < 1e-3f;
 	}
-
-	// LayeredMove를 최종 속도에 합치는 방식
+	
 	enum class MixMode
 	{
 		Override,
@@ -34,19 +32,17 @@ export namespace hs
 	enum class BoundsResponse
 	{
 		None,
-		Reflect,	// 반사
-		Wrap,		// 반대편으로
-		Clamp,		// 경계에서 멈춤
+		Reflect,
+		Wrap,
+		Clamp,
 	};
 	
-	// 이동 방식. 한 번에 하나만 활성화
-	// Velocity를 수정할 뿐 위치는 건드리지 않는다
 	class IMovementMode
 	{
 	public:
 		virtual ~IMovementMode() = default;
 
-		virtual void CalcVelocity(Velocity& velocity, const Rectangle& rect, float dt) = 0;
+		virtual void CalcVelocity(Velocity& velocity, const Transform& transform, float dt) = 0;
 	};
 
 	// 기본 이동 위에 잠깐 얹히는 한 겹. 이번 프레임의 속도만 계산하고, 끝나면 제거된다
@@ -55,8 +51,29 @@ export namespace hs
 	public:
 		virtual ~ILayeredMove() = default;
 
-		virtual MixMode Mode() const = 0;
-		virtual Vec2 Evaluate(const Rectangle& rect, float dt) = 0;
+		virtual MixMode GetMixMode() const = 0;
+		virtual Vec2 Evaluate(const Transform& transform, float dt) = 0;
 		virtual bool IsFinished() const = 0;
+	};
+
+	// 오브젝트에 붙이는 이동 컴포넌트. 데이터만 들고 있고 실행은 MovementSystem이 한다
+	struct Mover
+	{
+		Mover() = default;
+		explicit Mover(Velocity velocity, BoundsResponse bounds = BoundsResponse::Reflect)
+			: velocity(velocity), bounds(bounds) {}
+
+		Velocity velocity;
+		BoundsResponse bounds{ BoundsResponse::Reflect };
+		bool enabled{ true };
+
+		std::unique_ptr<IMovementMode> mode;
+		std::vector<std::unique_ptr<ILayeredMove>> layeredMoves;
+
+		// 이동 방식은 하나만 유효하다. 새로 넣으면 이전 것은 사라진다
+		void SetMode(std::unique_ptr<IMovementMode> newMode) { mode = std::move(newMode); }
+
+		// 잠깐 얹히는 이동. 끝나면 MovementSystem이 제거한다
+		void AddLayeredMove(std::unique_ptr<ILayeredMove> move) { layeredMoves.push_back(std::move(move)); }
 	};
 }

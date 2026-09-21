@@ -12,11 +12,12 @@ export namespace hs
 	float EaseOut(float t) { return 1 - (1 - t) * (1 - t); }
 	float EaseInOut(float t)
 	{
-		return t < 0.5f ? 2 * t * t : 1 - std::pow(-2 * t + 2, 2) / 2;
+		float u = -2 * t + 2;
+		return t < 0.5f ? 2 * t * t : 1 - u * u / 2;
 	}
 
 	float EaseInCubic(float t) { return t * t * t; }
-	float EaseOutCubic(float t) { return 1 - std::pow(1 - t, 3); }
+	float EaseOutCubic(float t) { return 1 - (1 - t) * (1 - t) * (1 - t); }
 	
 	float EaseOutBack(float t)
 	{
@@ -30,7 +31,6 @@ export namespace hs
 
 	float Reverse(float t) { return 1 - t; }
 
-	// f를 먼저 적용하고 그 결과에 g를 적용한다
 	EaseFn Compose(EaseFn f, EaseFn g)
 	{
 		return [f = std::move(f), g = std::move(g)](float t) { return g(f(t)); };

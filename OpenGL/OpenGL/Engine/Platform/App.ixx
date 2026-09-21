@@ -15,7 +15,8 @@ export namespace hs
 	class App
 	{
 	public:
-		App(int width, int height, const char* title)
+		App(int width, int height, const char* title,
+			RendererFactory makeRenderer = [] { return std::make_unique<FirstRenderer>(); })
 		{
 			if (!glfwInit()) {
 				throw std::runtime_error("GLFW 초기화 실패!");
@@ -40,7 +41,12 @@ export namespace hs
 				glfwTerminate();
 				throw std::runtime_error("GLEW 초기화 실패!");
 			}
-			_renderer = std::make_unique<FirstRenderer>();
+			_renderer = makeRenderer();
+			if (!_renderer) {
+				glfwDestroyWindow(_window);
+				glfwTerminate();
+				throw std::runtime_error("렌더러 생성 실패!");
+			}
 
 			glViewport(0, 0, width, height);
 			glfwSwapInterval(1);
@@ -92,8 +98,11 @@ export namespace hs
 				glfwPollEvents();
 
 				double now = glfwGetTime();
-				Update(static_cast<float>(now - last));
+				// 창 드래그 중엔 프레임이 멈춘다. 쌓인 시간을 그대로 넘기면 한 프레임에 크게 튄다
+				float dt = std::min(static_cast<float>(now - last), MaxDelta);
 				last = now;
+
+				Update(dt);
 
 				Render();
 
@@ -114,6 +123,9 @@ export namespace hs
 		GLFWwindow* _window{};
 		Input		_input;
 		std::unique_ptr<IRenderer> _renderer;
+
+		// 20fps 밑으로 떨어지면 느려질지언정 건너뛰지는 않는다
+		static constexpr float MaxDelta = 0.05f;
 
 
 

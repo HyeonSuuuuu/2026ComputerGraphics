@@ -14,7 +14,10 @@ export namespace hs
 	public:
 		App04(int width, int height)
 			: Super(width, height, "App04")
-		{}
+		{
+			// 맵 범위가 화면과 다르면 여기서 한 번만 설정한다
+			// _scene.SetBounds({ .min{ -1.f, -1.f }, .max{ 1.f, 1.f } });
+		}
 
 	protected:
 
@@ -23,103 +26,48 @@ export namespace hs
 			const auto& input = GetInput();
 
 			if (input.IsMousePressed(GLFW_MOUSE_BUTTON_LEFT))
+			{
+				if (_scene.Size() >= MaxSpawnRect )
+					return;
 				Spawn(input.MousePos());
+			}
+			if (input.IsKeyHeld(GLFW_KEY_1))
+			{
+				
+			}
+			if (input.IsKeyPressed(GLFW_KEY_Q))
+				Close();
 
-			if (input.IsKeyPressed(GLFW_KEY_1))		SetModeAll(nullptr);						// 등속 직선
-			if (input.IsKeyPressed(GLFW_KEY_2))		SetModeAll([] { return std::make_unique<ZigZagMode>(ZigZagInterval); });
-			if (input.IsKeyPressed(GLFW_KEY_3))		SetModeAll([&] { return std::make_unique<FollowMode>(input.MousePos()); });
-
-			if (input.IsKeyPressed(GLFW_KEY_R))		ReturnAll();							// 원위치 복귀
-			if (input.IsKeyPressed(GLFW_KEY_K))		KnockbackAll();							// 넉백
-			if (input.IsKeyPressed(GLFW_KEY_SPACE))	_paused = !_paused;
-			if (input.IsKeyPressed(GLFW_KEY_C))		Reset();
-
-			if (input.IsKeyPressed(GLFW_KEY_EQUAL))	ScaleSpeed(1.25f);
-			if (input.IsKeyPressed(GLFW_KEY_MINUS))	ScaleSpeed(0.8f);
-
-			if (input.IsKeyPressed(GLFW_KEY_Q))		Close();
-
-			// 추적 모드는 매 프레임 목표를 갱신한다
-			_registry.Movement().ForEach([&](MovementSystem::Mover& mover) {
-				if (auto* follow = dynamic_cast<FollowMode*>(mover.mode.get()))
-					follow->SetTarget(input.MousePos());
-				});
-
-			if (_paused)
-				return;
-
-			// dt 상한을 두지 않으면 창을 드래그하는 동안 경계를 크게 넘어간다
-			_registry.Movement().Tick(_registry.Rects(), std::min(dt, MaxDelta));
+			MovementSystem::Tick(_scene, dt);
 		}
 
 		void Render() override
 		{
 			auto& renderer = GetRenderer();
 			renderer.Clear({ 0.15f, 0.15f, 0.18f });
-			for (const auto& entry : _registry.Rects().Entries())
-				renderer.DrawRect(entry.rect);
+			RenderSystem::Draw(_scene, renderer);
 		}
 
 	private:
 		void Spawn(Vec2 pos)
 		{
-			if (_registry.Rects().Size() >= MaxRectCount)
-				return;
+			Object& object = _scene.Spawn({ .pos = pos, .size = { RectSize, RectSize } });
+			object.visual.Add(RandomColor());
 
-			EntityId id = _registry.Spawn({ .pos = pos, .size = { RectSize, RectSize }, .color = RandomColor() });
-			_registry.Movement().Attach(id,
-				{ .dir = Normalize(RandomVec2({ -1.f, -1.f }, { 1.f, 1.f })), .speed = Random(0.3f, 0.7f) });
+			// 움직일 필요가 없으면 이 줄을 빼면 된다
+			//Mover& mover = object.mover.Add(Velocity{ .dir = Normalize(RandomVec2({ -1.f, -1.f }, { 1.f, 1.f })), .speed = 0.5f });
 
-			_origins[id] = pos;
+			// 이동 방식은 하나만 유효하다. 교체하면 이전 것은 사라진다
+			// mover.SetMode(std::make_unique<ZigZagMode>(0.3f));
+
+			// 잠깐 얹히는 이동. 끝나면 원래 움직임으로 돌아간다
+			// mover.AddLayeredMove(std::make_unique<MoveTo>(target, 0.4f, EaseOut));
 		}
 
-		void Reset()
-		{
-			_registry.Clear();
-			_origins.clear();
-		}
+		Scene							_scene;
 
-		// 이동 방식은 하나만 유효하므로 교체한다. make가 없으면 등속 직선으로 돌아간다
-		void SetModeAll(auto make)
-		{
-			for (const auto& entry : _registry.Rects().Entries())
-			{
-				if constexpr (std::is_null_pointer_v<decltype(make)>)
-					_registry.Movement().SetMode(entry.id, nullptr);
-				else
-					_registry.Movement().SetMode(entry.id, make());
-			}
-		}
-
-		// 원위치로 부드럽게 복귀. 도착하면 원래 속도로 다시 움직인다
-		void ReturnAll()
-		{
-			for (const auto& [id, origin] : _origins)
-				_registry.Movement().AddLayeredMove(id, std::make_unique<MoveTo>(origin, ReturnDuration, EaseOut));
-		}
-
-		void KnockbackAll()
-		{
-			for (const auto& entry : _registry.Rects().Entries())
-				_registry.Movement().AddLayeredMove(entry.id,
-					std::make_unique<Impulse>(RandomVec2({ -1.f, -1.f }, { 1.f, 1.f }), KnockbackSpeed, KnockbackTime));
-		}
-
-		void ScaleSpeed(float scale)
-		{
-			_registry.Movement().ForEach([scale](MovementSystem::Mover& mover) { mover.velocity.speed *= scale; });
-		}
-
-		Registry									_registry;
-		std::unordered_map<EntityId, Vec2>			_origins;	// 복귀 지점
-		bool										_paused{};
-
-		static constexpr std::size_t	MaxRectCount = 20;
 		static constexpr float			RectSize = 0.12f;
-		static constexpr float			MaxDelta = 0.05f;
-		static constexpr float			ZigZagInterval = 0.3f;
-		static constexpr float			ReturnDuration = 0.4f;
-		static constexpr float			KnockbackSpeed = 2.0f;
-		static constexpr float			KnockbackTime = 0.25f;
+		
+		static constexpr uint32_t		MaxSpawnRect = 5;
 	};
 }

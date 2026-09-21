@@ -17,11 +17,11 @@ export namespace hs
             glClear(GL_COLOR_BUFFER_BIT);
         }
 
-        void DrawRect(const Rectangle& rect) override
+        void DrawRect(const Transform& transform, Color color) override
         {
-            glColor3f(rect.color.r, rect.color.g, rect.color.b);
-            glRectf(rect.pos.x - rect.size.x / 2, rect.pos.y - rect.size.y / 2,
-                rect.pos.x + rect.size.x / 2, rect.pos.y + rect.size.y / 2);
+            glColor3f(color.r, color.g, color.b);
+            glRectf(transform.pos.x - transform.size.x / 2, transform.pos.y - transform.size.y / 2,
+                transform.pos.x + transform.size.x / 2, transform.pos.y + transform.size.y / 2);
         }
     };
 }

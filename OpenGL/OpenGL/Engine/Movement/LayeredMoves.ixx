@@ -23,14 +23,14 @@ export namespace hs
 			Check(_ease != nullptr, "이징 함수가 비어 있다");
 		}
 
-		MixMode Mode() const override { return MixMode::Override; }
+		MixMode GetMixMode() const override { return MixMode::Override; }
 		bool IsFinished() const override { return _elapsed >= _duration; }
 
-		Vec2 Evaluate(const Rectangle& rect, float dt) override
+		Vec2 Evaluate(const Transform& transform, float dt) override
 		{
 			if (!_started)			// 시작 위치는 생성 시점이 아니라 첫 평가 때 잡는다
 			{
-				_start = rect.pos;
+				_start = transform.pos;
 				_started = true;
 			}
 
@@ -41,7 +41,7 @@ export namespace hs
 
 			// 이번 프레임에 있어야 할 위치까지 가는 데 필요한 속도
 			Vec2 desired = Lerp(_start, _target, _ease(_elapsed / _duration));
-			return (desired - rect.pos) / dt;
+			return (desired - transform.pos) / dt;
 		}
 
 	private:
@@ -67,10 +67,10 @@ export namespace hs
 			Check(_curve != nullptr, "커브 함수가 비어 있다");
 		}
 
-		MixMode Mode() const override { return MixMode::Additive; }
+		MixMode GetMixMode() const override { return MixMode::Additive; }
 		bool IsFinished() const override { return _elapsed >= _duration; }
 
-		Vec2 Evaluate(const Rectangle&, float dt) override
+		Vec2 Evaluate(const Transform&, float dt) override
 		{
 			if (_duration <= 0.f)
 				return {};

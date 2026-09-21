@@ -137,19 +137,21 @@
   <ItemGroup>
     <ClCompile Include="Engine\Platform\App.ixx" />
     <ClCompile Include="Engine\Core\Check.ixx" />
+    <ClCompile Include="Engine\Core\Component.ixx" />
     <ClCompile Include="Engine\Math\Easing.ixx" />
     <ClCompile Include="Engine\Movement\LayeredMoves.ixx" />
     <ClCompile Include="Engine\Movement\MovementModes.ixx" />
-    <ClCompile Include="Engine\Scene\Registry.ixx" />
-    <ClCompile Include="Engine\Core\Entity.ixx" />
     <ClCompile Include="Engine\Render\FirstRenderer.ixx" />
     <ClCompile Include="Engine\Platform\Input.ixx" />
     <ClCompile Include="Engine\Engine.ixx" />
     <ClCompile Include="Engine\Movement\Movement.ixx" />
     <ClCompile Include="Engine\Movement\MovementSystem.ixx" />
     <ClCompile Include="Engine\Core\Random.ixx" />
-    <ClCompile Include="Engine\Scene\RectLayer.ixx" />
     <ClCompile Include="Engine\Render\Renderer.ixx" />
+    <ClCompile Include="Engine\Render\Visual.ixx" />
+    <ClCompile Include="Engine\Render\RenderSystem.ixx" />
+    <ClCompile Include="Engine\Scene\Object.ixx" />
+    <ClCompile Include="Engine\Scene\Scene.ixx" />
     <ClCompile Include="Engine\Math\Shape.ixx" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Subject\04\App04.ixx">

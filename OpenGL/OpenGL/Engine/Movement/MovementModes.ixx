@@ -21,7 +21,7 @@ export namespace hs
 			Check(interval > 0.f, "간격이 0 이하면 방향이 매 프레임 뒤집힌다");
 		}
 
-		void CalcVelocity(Velocity& velocity, const Rectangle&, float dt) override
+		void CalcVelocity(Velocity& velocity, const Transform&, float dt) override
 		{
 			if (_interval <= 0.f)
 				return;
@@ -39,22 +39,26 @@ export namespace hs
 		float _timer{};
 	};
 
+	// 목표를 읽어오는 함수. 캡처한 대상이 이 모드보다 오래 살아야 한다
+	using TargetFn = std::function<Vec2()>;
+
 	// 목표 지점을 향한다. 도착 반경 안에 들어오면 멈춘다
 	class FollowMode final : public IMovementMode
 	{
 	public:
-		FollowMode(Vec2 target, float arriveRadius = 0.01f)
-			: _target(target), _arriveRadius(arriveRadius)
+		explicit FollowMode(TargetFn target, float arriveRadius = 0.01f)
+			: _target(std::move(target)), _arriveRadius(arriveRadius)
 		{
+			Check(_target != nullptr, "목표를 읽을 방법이 없다");
 			Check(arriveRadius >= 0.f);
 		}
 
-		void SetTarget(Vec2 target) { _target = target; }
-		Vec2 GetTarget() const { return _target; }
+		explicit FollowMode(Vec2 target, float arriveRadius = 0.01f)
+			: FollowMode(TargetFn{ [target] { return target; } }, arriveRadius) {}
 
-		void CalcVelocity(Velocity& velocity, const Rectangle& rect, float) override
+		void CalcVelocity(Velocity& velocity, const Transform& transform, float) override
 		{
-			Vec2 offset = _target - rect.pos;
+			Vec2 offset = _target() - transform.pos;
 			if (LengthSq(offset) <= _arriveRadius * _arriveRadius)
 			{
 				_reached = true;
@@ -69,7 +73,7 @@ export namespace hs
 		bool Reached() const { return _reached; }
 
 	private:
-		Vec2 _target;
+		TargetFn _target;
 		float _arriveRadius;
 		bool _reached{};
 	};
