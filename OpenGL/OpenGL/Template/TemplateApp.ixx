@@ -30,9 +30,10 @@ export namespace hs
 
 			// 이 과제의 입력과 규칙은 여기에
 
-			MovementSystem::Tick(_scene, dt);
-			CollisionSystem::Tick(_scene);	// 겹침 해소는 맨 뒤
-			_scene.Flush();			// 목록 변경은 여기서만 일어난다
+			AnimationSystem::Tick(_scene, dt);	// 시간 함수로 정해지는 값 (크기·색)
+			MovementSystem::Tick(_scene, dt);	// 속도와 적분
+			CollisionSystem::Tick(_scene);		// 겹침 해소
+			_scene.Flush();						// 목록 변경은 여기서만
 		}
 
 		void Render() override
@@ -43,9 +44,12 @@ export namespace hs
 		}
 
 	private:
-		// 만들기: _scene.Spawn({ .pos = pos, .size = { 0.12f, 0.12f } })
-		// 붙이기: object.Add<Visual>(RandomColor()) / object.Add<Mover>(Velocity{ .dir = d, .speed = 0.5f })
-		// 찾기:   _scene.HitTest(point) / _scene.FindOverlap(object) / _scene.Destroy(object)
+		// 만들기:   Object& object = _scene.Spawn({ .pos = pos, .size = { 0.12f, 0.12f } })
+		// 붙이기:   object.Add<Visual>(RandomColor()) / object.Add<Mover>(Velocity{ .dir = d, .speed = 0.5f })
+		// 이동방식: mover->SetMode(std::make_unique<ZigZagMode>(0.3f))   // 한 번에 하나
+		// 연출:     object.Add<Animator>().Add<ScalePulse>()             // 여러 개 가능
+		// 찾기:     _scene.HitTest(point) / _scene.FindOverlap(object) / _scene.Destroy(object)
+		// 게임 쪽 컴포넌트: struct Health : IComponent { ... }; 엔진은 안 건드린다
 		Scene						_scene;
 
 		static constexpr Color		Background{ 0.15f, 0.15f, 0.18f };
