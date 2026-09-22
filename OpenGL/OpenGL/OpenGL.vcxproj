@@ -136,10 +136,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Platform\App.ixx" />
+    <ClCompile Include="Engine\Animation\Animation.ixx" />
+    <ClCompile Include="Engine\Animation\Animations.ixx" />
+    <ClCompile Include="Engine\Animation\AnimationSystem.ixx" />
     <ClCompile Include="Engine\Core\Check.ixx" />
     <ClCompile Include="Engine\Core\Component.ixx" />
     <ClCompile Include="Engine\Math\Easing.ixx" />
-    <ClCompile Include="Engine\Movement\LayeredMoves.ixx" />
+    <ClCompile Include="Engine\Collision\CollisionSystem.ixx" />
     <ClCompile Include="Engine\Movement\MovementModes.ixx" />
     <ClCompile Include="Engine\Render\FirstRenderer.ixx" />
     <ClCompile Include="Engine\Platform\Input.ixx" />
@@ -154,6 +157,7 @@
     <ClCompile Include="Engine\Scene\Scene.ixx" />
     <ClCompile Include="Engine\Math\Shape.ixx" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Subject\04\Rect.ixx" />
     <ClCompile Include="Subject\04\App04.ixx">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

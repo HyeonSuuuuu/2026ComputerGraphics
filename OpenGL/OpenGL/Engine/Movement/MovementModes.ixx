@@ -39,6 +39,91 @@ export namespace hs
 		float _timer{};
 	};
 
+	// 테두리를 시계방향으로 돈다. 진행 거리 s가 위치를 정하므로, s를 벌려두면 줄지어 돈다
+	class EdgePatrolMode final : public IMovementMode
+	{
+	public:
+		EdgePatrolMode(Bounds area, float speed)
+			: _area(area), _speed(speed)
+		{
+			Check(speed > 0.f, "속도가 0이면 제자리에 선다");
+			Check(Perimeter(area) > 0.f, "영역이 한 점이면 돌 곳이 없다");
+		}
+
+		static float Perimeter(const Bounds& area)
+		{
+			Vec2 size = area.Size();
+			return 2.f * (size.x + size.y);
+		}
+
+		void CalcVelocity(Velocity& velocity, const Transform& transform, float dt) override
+		{
+			if (dt <= 0.f)
+				return;
+
+			// 벽에 닿기 전까지는 하던 대로 간다. 닿은 자리에서 테두리에 올라탄다
+			if (!_joined)
+			{
+				if (!OnBorder(transform.pos))
+					return;
+
+				_s = SFromPoint(transform.pos);
+				_joined = true;
+			}
+
+			_s = std::fmod(_s + _speed * dt, Perimeter(_area));
+
+			// 이번 프레임에 있어야 할 지점까지 가는 데 필요한 속도를 역산한다
+			Vec2 offset = PointAt(_s) - transform.pos;
+			velocity.dir = Normalize(offset);
+			velocity.speed = Length(offset) / dt;
+		}
+
+	private:
+		bool OnBorder(Vec2 pos) const
+		{
+			return pos.x <= _area.min.x + Epsilon || pos.x >= _area.max.x - Epsilon
+				|| pos.y <= _area.min.y + Epsilon || pos.y >= _area.max.y - Epsilon;
+		}
+
+		// PointAt의 역. 테두리 위 점이 진행 거리 얼마에 해당하는지
+		float SFromPoint(Vec2 pos) const
+		{
+			Vec2 size = _area.Size();
+			float toTop = _area.max.y - pos.y;
+			float toRight = _area.max.x - pos.x;
+			float toBottom = pos.y - _area.min.y;
+			float toLeft = pos.x - _area.min.x;
+			float nearest = std::min({ toTop, toRight, toBottom, toLeft });
+
+			if (nearest == toTop)		return pos.x - _area.min.x;
+			if (nearest == toRight)		return size.x + (_area.max.y - pos.y);
+			if (nearest == toBottom)	return size.x + size.y + (_area.max.x - pos.x);
+			return 2.f * size.x + size.y + (pos.y - _area.min.y);
+		}
+
+		// 좌상단에서 출발해 시계방향
+		Vec2 PointAt(float s) const
+		{
+			Vec2 size = _area.Size();
+
+			if (s < size.x)			return { _area.min.x + s, _area.max.y };		// 위: 왼→오
+			s -= size.x;
+			if (s < size.y)			return { _area.max.x, _area.max.y - s };		// 오른쪽: 위→아래
+			s -= size.y;
+			if (s < size.x)			return { _area.max.x - s, _area.min.y };		// 아래: 오→왼
+			s -= size.x;
+			return { _area.min.x, _area.min.y + s };							// 왼쪽: 아래→위
+		}
+
+		Bounds _area;
+		float _speed;
+		float _s{};
+		bool _joined{};
+
+		static constexpr float Epsilon = 1e-4f;
+	};
+
 	// 목표를 읽어오는 함수. 캡처한 대상이 이 모드보다 오래 살아야 한다
 	using TargetFn = std::function<Vec2()>;
 
