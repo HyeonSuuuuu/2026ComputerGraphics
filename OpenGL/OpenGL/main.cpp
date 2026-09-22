@@ -4,12 +4,13 @@
 import std;
 
 import app04;
+import app05;
 
 int main()
 {
 	try
 	{
-		hs::App04 app(800, 600);
+		hs::App05 app(800, 600);
 		app.Run();
 	}
 	catch (const std::exception& e)

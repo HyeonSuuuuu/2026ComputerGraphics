@@ -127,20 +127,20 @@ export namespace hs
 			{
 			case Motion::Diagonal:
 				mover->SetMode(nullptr);				// 모드 없음 = 등속 직선
-				mover->bounds = BoundsResponse::Reflect;
+				mover->boundsResponse = BoundsResponse::Reflect;
 				mover->velocity = { .dir = Rect::RandomDiagonal(), .speed = Rect::Speed };
 				break;
 
 			case Motion::ZigZag:
 				mover->SetMode(std::make_unique<ZigZagMode>(ZigZagInterval));
-				mover->bounds = BoundsResponse::Reflect;
+				mover->boundsResponse = BoundsResponse::Reflect;
 				mover->velocity = { .dir = { 1.f, 0.f }, .speed = Rect::Speed };
 				break;
 
 			case Motion::Home:
 				if (Home* home = object.Get<Home>())
 					mover->SetMode(std::make_unique<FollowMode>(home->pos));
-				mover->bounds = BoundsResponse::Clamp;
+				mover->boundsResponse = BoundsResponse::Clamp;
 				mover->velocity.speed = Rect::Speed;	// 도착하면 FollowMode가 0으로 만듬
 				break;
 
@@ -150,7 +150,7 @@ export namespace hs
 					mover->velocity = { .dir = Rect::RandomDiagonal(), .speed = Rect::Speed };
 
 				mover->SetMode(std::make_unique<EdgePatrolMode>(PatrolArea(), Rect::Speed));
-				mover->bounds = BoundsResponse::Clamp;
+				mover->boundsResponse = BoundsResponse::Clamp;
 				break;
 			}
 
@@ -165,7 +165,7 @@ export namespace hs
 		
 		Bounds PatrolArea() const
 		{
-			Bounds area = _scene.GetBounds();
+			Bounds area = _scene.WorldBounds();
 			const float half = Rect::Size / 2.f;
 			area.min += Vec2{ half, half };
 			area.max -= Vec2{ half, half };
@@ -177,11 +177,7 @@ export namespace hs
 		{
 			if (Animator* animator = object.Get<Animator>())
 				if (T* animation = animator->Get<T>())
-				{
-					animation->enabled = on;
-					if (!on)
-						animation->Restore(object);
-				}
+					animation->SetEnabled(object, on);
 		}
 
 		// 방향과 모드는 그대로 두고 멈추기만 한다

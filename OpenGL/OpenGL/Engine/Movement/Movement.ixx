@@ -45,11 +45,11 @@ export namespace hs
 	struct Mover : IComponent
 	{
 		Mover() = default;
-		explicit Mover(Velocity velocity, BoundsResponse bounds = BoundsResponse::Reflect)
-			: velocity(velocity), bounds(bounds) {}
+		explicit Mover(Velocity velocity, BoundsResponse response = BoundsResponse::Reflect)
+			: velocity(velocity), boundsResponse(response) {}
 
 		Velocity velocity;
-		BoundsResponse bounds{ BoundsResponse::Reflect };
+		BoundsResponse boundsResponse{ BoundsResponse::Reflect };
 		bool enabled{ true };
 
 		std::unique_ptr<IMovementMode> mode;

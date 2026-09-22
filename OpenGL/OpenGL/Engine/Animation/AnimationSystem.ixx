@@ -16,15 +16,12 @@ export namespace hs
 
 			for (Object& object : scene.Objects())
 			{
-				if (!object.IsAlive())
-					continue;
-
 				Animator* animator = object.Get<Animator>();
 				if (!animator || !animator->enabled)
 					continue;
 
 				for (auto& [type, animation] : animator->animations)
-					if (animation->enabled)
+					if (animation->IsEnabled())
 						animation->Update(object, dt);
 
 				std::erase_if(animator->animations, [&object](const auto& entry)
@@ -32,7 +29,7 @@ export namespace hs
 						if (!entry.second->IsFinished())
 							return false;
 
-						entry.second->Restore(object);
+						entry.second->SetEnabled(object, false);	// 지우기 전에 되돌린다
 						return true;
 					});
 			}

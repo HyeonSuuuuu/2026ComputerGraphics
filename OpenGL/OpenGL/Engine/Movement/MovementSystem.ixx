@@ -22,9 +22,6 @@ export namespace hs
 
 			for (Object& object : scene.Objects())
 			{
-				if (!object.IsAlive())
-					continue;
-
 				Mover* mover = object.Get<Mover>();
 				if (mover && mover->enabled)
 					Step(*mover, object.transform, dt);

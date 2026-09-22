@@ -11,24 +11,46 @@ import hs.scene;
 
 export namespace hs
 {
+	// 겹친 두 오브젝트. 무엇을 할지는 게임이 정한다
+	struct Hit
+	{
+		Object* a;
+		Object* b;
+	};
+
 	// 겹침을 해소한다. 모든 값이 정해진 뒤 프레임 마지막에 돈다
 	// 지금은 경계(벽)만 본다. 오브젝트끼리는 여기에 붙는다
 	class CollisionSystem
 	{
 	public:
+		// 겹친 쌍을 모은다. 아무것도 바꾸지 않는다
+		static void FindHits(Scene& scene, std::vector<Hit>& hits)
+		{
+			// 오브젝트가 적어 전부 대 전부로 본다. 수백 개가 넘으면 공간 분할이 필요하다
+			auto objects = scene.Objects();
+			for (auto it = objects.begin(); it != objects.end(); ++it)
+			{
+				Object& a = *it;
+				for (auto other = std::next(it); other != objects.end(); ++other)
+				{
+					Object& b = *other;
+					if (a.GetBounds().Intersects(b.GetBounds()))
+						hits.push_back({ &a, &b });
+				}
+			}
+		}
+
+		// 경계 밖으로 나간 것을 되돌린다
 		static void Tick(Scene& scene)
 		{
-			const Bounds bounds = scene.GetBounds();
+			const Bounds bounds = scene.WorldBounds();
 			for (Object& object : scene.Objects())
 			{
-				if (!object.IsAlive())
-					continue;
-
 				Mover* mover = object.Get<Mover>();
 				if (!mover)
 					continue;
 
-				ResolveBounds(object.transform, mover->velocity, mover->bounds, bounds);
+				ResolveBounds(object.transform, mover->velocity, mover->boundsResponse, bounds);
 			}
 		}
 

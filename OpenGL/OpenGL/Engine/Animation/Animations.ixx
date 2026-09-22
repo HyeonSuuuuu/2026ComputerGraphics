@@ -50,7 +50,7 @@ export namespace hs
 		explicit ColorCycle(float period = 3.f, float start = 0.f)
 			: _playback(period)
 		{
-			_playback.time = start * period;
+			_playback.Seek(start);
 		}
 
 		void Update(Object& object, float dt) override
