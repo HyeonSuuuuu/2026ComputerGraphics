@@ -1,0 +1,42 @@
+export module app04.rect;
+
+import std;
+import hs;
+
+export namespace hs
+{
+	// 처음 만들어진 자리. 돌아갈 곳을 기억한다
+	struct Home : IComponent
+	{
+		explicit Home(Vec2 pos) : pos(pos) {}
+
+		Vec2 pos;
+	};
+
+	class Rect
+	{
+	public:
+		static Object& Spawn(Scene& scene, Vec2 pos)
+		{
+			Object& object = scene.Spawn({ .pos = pos, .size = { Size, Size } });
+			object.Add<Home>(pos);
+			object.Add<Visual>(RandomColor());
+			object.Add<Mover>(Velocity{ .dir = RandomDiagonal(), .speed = Speed });
+			Animator& animator = object.Add<Animator>();
+			animator.Add<ScalePulse>();
+			animator.Add<ColorCycle>(3.f, Random(0.f, 1.f));	// 시작 색을 흩어놓는다
+			
+			return object;
+		}
+
+		// 네 방향 대각선 중 하나
+		static Vec2 RandomDiagonal()
+		{
+			constexpr float d = 0.70710678f;	// 1 / root 2
+			return { Random(0, 1) ? d : -d, Random(0, 1) ? d : -d };
+		}
+
+		static constexpr float Size = 0.12f;
+		static constexpr float Speed = 0.5f;
+	};
+}

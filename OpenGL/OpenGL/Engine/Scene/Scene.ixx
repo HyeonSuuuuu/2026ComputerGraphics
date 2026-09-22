@@ -11,25 +11,32 @@ export namespace hs
 	class Scene
 	{
 	public:
+		// 목록은 Flush에서만 바뀐다. 순회 중 어디서 불러도 안전하다
 		Object& Spawn(const Transform& transform)
 		{
 			Check(transform.size.x > 0.f && transform.size.y > 0.f, "크기가 0인 오브젝트는 보이지도 맞지도 않는다");
-			
-			_objects.push_back(std::make_unique<Object>(transform));
-			return *_objects.back();
+
+			_spawned.push_back(std::make_unique<Object>(transform));
+			return *_spawned.back();
 		}
 
-		bool Destroy(const Object* object)
+		void Destroy(Object& object) { object._alive = false; }
+
+		// 프레임의 정해진 한 지점에서 부른다. 순회 중에 부르면 안 된다
+		void Flush()
 		{
-			auto it = std::ranges::find_if(_objects, [object](const auto& o) { return o.get() == object; });
-			if (it == _objects.end())
-				return false;
+			_objects.insert(_objects.end(),
+				std::make_move_iterator(_spawned.begin()), std::make_move_iterator(_spawned.end()));
+			_spawned.clear();
 
-			_objects.erase(it);
-			return true;
+			std::erase_if(_objects, [](const auto& object) { return !object->IsAlive(); });
 		}
 
-		void Clear() { _objects.clear(); }
+		void Clear()
+		{
+			_objects.clear();
+			_spawned.clear();
+		}
 
 		// 오브젝트가 돌아다닐 수 있는 영역. 레벨이 바뀔 때만 갱신하면 된다
 		void SetBounds(Bounds bounds)
@@ -44,7 +51,7 @@ export namespace hs
 		Object* HitTest(Vec2 point)
 		{
 			for (auto& object : _objects | std::views::reverse)
-				if (object->GetBounds().Contains(point))
+				if (object->IsAlive() && object->GetBounds().Contains(point))
 					return object.get();
 			return nullptr;
 		}
@@ -52,7 +59,7 @@ export namespace hs
 		Object* FindOverlap(const Object& target)
 		{
 			for (auto& object : _objects | std::views::reverse)
-				if (object.get() != &target && object->GetBounds().Intersects(target.GetBounds()))
+				if (object.get() != &target && object->IsAlive() && object->GetBounds().Intersects(target.GetBounds()))
 					return object.get();
 			return nullptr;
 		}
@@ -65,6 +72,7 @@ export namespace hs
 
 	private:
 		std::vector<std::unique_ptr<Object>> _objects;
+		std::vector<std::unique_ptr<Object>> _spawned;	// Flush 때 _objects로 들어간다
 		Bounds _bounds{ .min{ -1.f, -1.f }, .max{ 1.f, 1.f } };	// 기본값은 NDC 전체
 	};
 }

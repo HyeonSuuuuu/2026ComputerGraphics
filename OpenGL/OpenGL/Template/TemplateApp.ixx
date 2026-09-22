@@ -31,6 +31,8 @@ export namespace hs
 			// 이 과제의 입력과 규칙은 여기에
 
 			MovementSystem::Tick(_scene, dt);
+			CollisionSystem::Tick(_scene);	// 겹침 해소는 맨 뒤
+			_scene.Flush();			// 목록 변경은 여기서만 일어난다
 		}
 
 		void Render() override
@@ -42,8 +44,8 @@ export namespace hs
 
 	private:
 		// 만들기: _scene.Spawn({ .pos = pos, .size = { 0.12f, 0.12f } })
-		// 붙이기: object.visual.Add(RandomColor()) / object.mover.Add(Velocity{ .dir = d, .speed = 0.5f })
-		// 찾기:   _scene.HitTest(point) / _scene.FindOverlap(object) / _scene.Destroy(&object)
+		// 붙이기: object.Add<Visual>(RandomColor()) / object.Add<Mover>(Velocity{ .dir = d, .speed = 0.5f })
+		// 찾기:   _scene.HitTest(point) / _scene.FindOverlap(object) / _scene.Destroy(object)
 		Scene						_scene;
 
 		static constexpr Color		Background{ 0.15f, 0.15f, 0.18f };
