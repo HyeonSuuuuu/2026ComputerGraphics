@@ -1,0 +1,25 @@
+{
+	"version": 6,
+	"configurePresets": [
+		{
+			"name": "debug",
+			"displayName": "Debug (GCC)",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/cmake-build-debug",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/g++.exe",
+				"CMAKE_MAKE_PROGRAM": "C:/msys64/ucrt64/bin/ninja.exe"
+			},
+			"environment": {
+				"PATH": "C:/msys64/ucrt64/bin;$penv{PATH}"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "debug",
+			"configurePreset": "debug"
+		}
+	]
+}
