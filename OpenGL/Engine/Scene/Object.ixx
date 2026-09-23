@@ -1,6 +1,3 @@
-module;
-#include <typeinfo>
-
 // Scene을 friend로 두려면 같은 모듈이어야 함 → hs.scene의 파티션
 export module hs.scene:object;
 
@@ -8,6 +5,7 @@ import std;
 import hs.check;
 import hs.shape;
 import hs.component;
+import hs.type_id;
 
 export namespace hs
 {
@@ -38,7 +36,7 @@ export namespace hs
 
 			auto created = std::make_unique<T>(std::forward<Args>(args)...);
 			T& added = *created;
-			_components.emplace_back(typeid(T), std::move(created));
+			_components.emplace_back(TypeIdOf<T>, std::move(created));
 			return added;
 		}
 
@@ -46,7 +44,7 @@ export namespace hs
 		T* Get()
 		{
 			for (auto& [type, component] : _components)
-				if (type == typeid(T))
+				if (type == TypeIdOf<T>)
 					return static_cast<T*>(component.get());
 			return nullptr;
 		}
@@ -55,7 +53,7 @@ export namespace hs
 		const T* Get() const
 		{
 			for (const auto& [type, component] : _components)
-				if (type == typeid(T))
+				if (type == TypeIdOf<T>)
 					return static_cast<const T*>(component.get());
 			return nullptr;
 		}
@@ -63,7 +61,7 @@ export namespace hs
 		template<class T>
 		bool Remove()
 		{
-			auto it = std::ranges::find_if(_components, [](const auto& e) { return e.first == typeid(T); });
+			auto it = std::ranges::find_if(_components, [](const auto& e) { return e.first == TypeIdOf<T>; });
 			if (it == _components.end())
 				return false;
 
@@ -83,6 +81,6 @@ export namespace hs
 		ObjectId _id;
 
 		// 보통 두세 개 → 선형 탐색이 해시보다 빠름
-		std::vector<std::pair<std::type_index, std::unique_ptr<IComponent>>> _components;
+		std::vector<std::pair<TypeId, std::unique_ptr<IComponent>>> _components;
 	};
 }

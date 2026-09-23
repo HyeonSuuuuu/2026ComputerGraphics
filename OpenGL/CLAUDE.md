@@ -14,7 +14,7 @@ cmake --build cmake-build-debug
 
 실행 파일은 `cmake-build-debug/OpenGL.exe` (glfw·glew DLL이 옆에 복사됨). 빌드 전에 실행 중인 프로세스를 먼저 종료할 것.
 라이브러리는 MSYS2 패키지: `mingw-w64-ucrt-x86_64-{gcc,cmake,ninja,glfw,glew,glm}`.
-C++26 + `-freflection`. `import std;`는 CMake 실험 기능이라 CMake를 올리면 `CMakeLists.txt`의 UUID도 바꿔야 한다.
+C++26 + `-freflection` + `-fno-rtti`(`typeid`·`dynamic_cast` 불가). `import std;`는 CMake 실험 기능이라 CMake를 올리면 `CMakeLists.txt`의 UUID도 바꿔야 한다.
 MSVC 프로젝트(`.slnx`·`.vcxproj`)는 제거됨 — 필요하면 git 기록에서 복구.
 
 ## 구조
@@ -24,7 +24,7 @@ CMakeLists.txt    빌드 설정 (Engine·Subject·Template의 .ixx를 전부 모
 main.cpp          실행할 과제 앱 선택
 Subject/NN        과제별 앱과 게임 쪽 컴포넌트
 Template          새 과제 시작용 뼈대
-Engine/Core       Check(단언), Component(IComponent), Random
+Engine/Core       Check(단언), Component(IComponent), Random, TypeId(리플렉션 이름 해시)
 Engine/Math       Shape(Vec2·Transform·Bounds·Color), Easing
 Engine/Scene      Object(컴포넌트 컨테이너), Scene(소유·조회)
 Engine/Movement   Mover, IMovementMode(ZigZag·Follow·EdgePatrol), MovementSystem
@@ -53,6 +53,7 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
 
 - **순회 중 Spawn/Destroy는 예약된다.** 다음 `Scene::Flush()`에서 반영된다. 직접 벡터를 건드리지 말 것.
 - **`Get<T>()`는 정확히 같은 타입만 찾는다.** 컴포넌트를 상속하면 조용히 못 찾는다.
+- **`TypeIdOf<T>`는 이름(`hs::Visual`)의 해시.** 과제마다 같은 이름으로 컴포넌트를 만들면 ID가 겹친다 → 과제별 네임스페이스로.
 - `switch`에서 일부러 흘릴 때는 `[[fallthrough]];`.
 - **모듈 간 전방 선언 불가.** `friend class X;`는 X를 선언한 모듈 소속으로 만든다 → 같은 모듈(파티션)이어야 함. `Object`가 `hs.scene:object`인 이유.
 - **`auto` 반환 멤버 함수는 클래스 안에서 쓰는 곳보다 먼저 정의.** GCC는 본문을 순서대로 추론한다.

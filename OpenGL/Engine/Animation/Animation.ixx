@@ -1,12 +1,10 @@
-module;
-#include <typeinfo>
-
 export module hs.animation;
 
 import std;
 import hs.check;
 import hs.component;
 import hs.scene;
+export import hs.type_id;
 
 // 충돌이 안 건드리는 값만 (크기·색·속력)
 export namespace hs
@@ -80,7 +78,7 @@ export namespace hs
 
 			auto created = std::make_unique<T>(std::forward<Args>(args)...);
 			T& added = *created;
-			animations.emplace_back(typeid(T), std::move(created));
+			animations.emplace_back(TypeIdOf<T>, std::move(created));
 			return added;
 		}
 
@@ -88,12 +86,12 @@ export namespace hs
 		T* Get()
 		{
 			for (auto& [type, animation] : animations)
-				if (type == typeid(T))
+				if (type == TypeIdOf<T>)
 					return static_cast<T*>(animation.get());
 			return nullptr;
 		}
 
-		std::vector<std::pair<std::type_index, std::unique_ptr<IAnimation>>> animations;
+		std::vector<std::pair<TypeId, std::unique_ptr<IAnimation>>> animations;
 		bool enabled{ true };
 	};
 }

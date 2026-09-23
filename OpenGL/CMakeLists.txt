@@ -17,6 +17,8 @@ endif()
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+# typeid, dynamic_cast 금지, 타입 구분은 hs.type_id로
+string(APPEND CMAKE_CXX_FLAGS " -fno-rtti")
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
