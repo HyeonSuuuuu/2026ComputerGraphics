@@ -6,7 +6,9 @@ export module app_name;
 import std;
 import hs;
 
-export namespace hs
+using namespace hs;
+
+export namespace app_name
 {
 	class App_name : public App
 	{

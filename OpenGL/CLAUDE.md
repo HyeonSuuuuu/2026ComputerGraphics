@@ -22,15 +22,15 @@ MSVC 프로젝트(`.slnx`·`.vcxproj`)는 제거됨 — 필요하면 git 기록�
 ```
 CMakeLists.txt    빌드 설정 (Engine·Subject·Template의 .ixx를 전부 모듈로)
 main.cpp          실행할 과제 앱 선택
-Subject/NN        과제별 앱과 게임 쪽 컴포넌트
+Subject/NN        과제별 앱과 게임 쪽 컴포넌트 (네임스페이스 appNN)
 Template          새 과제 시작용 뼈대
 Engine/Core       Check(단언), Component(IComponent), Random, TypeId(리플렉션 이름 해시)
-Engine/Math       Shape(Vec2·Transform·Bounds·Color), Easing
-Engine/Scene      Object(컴포넌트 컨테이너), Scene(소유·조회)
+Engine/Math       Vec2(glm 래핑), Bounds(AABB), Easing
+Engine/Scene      Transform(pos·size), Object(컴포넌트 컨테이너), Scene(소유·조회)
 Engine/Movement   Mover, IMovementMode(ZigZag·Follow·EdgePatrol), MovementSystem
 Engine/Animation  IAnimation·Animator·Playback, Animations(ScalePulse·ColorCycle·ScaleIn·SizeChase), AnimationSystem
-Engine/Collision  CollisionSystem(경계·Separate·FindContacts), ContactTracker(Enter/Stay/Exit), Trigger
-Engine/Render     IRenderer, FirstRenderer(고정 파이프라인), Visual, RenderSystem
+Engine/Collision  CollisionSystem(경계·Separate·FindContacts, Trigger), ContactTracker(Enter/Stay/Exit)
+Engine/Render     Color(HSV·RandomColor), IRenderer, FirstRenderer(고정 파이프라인), Visual, RenderSystem
 Engine/Platform   App(창·루프·입력), Input
 ```
 
@@ -41,13 +41,16 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
 ## 설계 규칙
 
 - **데이터와 실행을 나눈다.** 컴포넌트는 데이터, 시스템이 돌린다. `Object`에 로직을 넣지 않는다.
-- **Movement는 위치와 속도**를 다룬다(충돌이 이 값들을 바꾼다). **Animation은 충돌이 안 건드리는 값**(크기·색·속력)을 시간 함수로 정한다.
+- **Movement는 위치와 속도**를 다룬다(충돌이 이 값들을 바꾼다). **Animation은 충돌이 바꾸지 않는 값**(크기·색·속력)을 시간 함수로 정한다. `transform.size`는 판정에 쓰이므로, 보이는 크기만 바꿀 때는 `Visual.effectScale`.
 - **종류는 상속이 아니라 구성으로.** `Object`를 상속하지 않는다. 종류가 다르면 붙이는 컴포넌트가 다른 것이고, 조립은 게임 쪽 함수가 한다(`Rect::Spawn`).
 - **상속은 "끼우는 자리"에만** — `App` 계층, `IMovementMode`, `IAnimation`, `IRenderer`, `IComponent`.
 - **컴포넌트는 게임 쪽에서 정의한다.** `struct Health : IComponent` 하면 끝이고 엔진은 안 바뀐다(예: `Subject/04/Rect.ixx`의 `Home`).
+- **게임 코드는 `hs` 밖에.** 과제마다 `appNN` 네임스페이스, 파일 위에 `using namespace hs;`.
+- **의존 방향은 Core·Math → Scene·Render → 시스템 → 게임.** 아래층이 위층을 import하지 않는다.
 - **태그로 분기하지 않는다.** 처리가 다르면 다형성으로. 태그는 "적인가?" 묻는 용도로만.
 - **추상화는 변화가 실제로 예상되는 경계부터.** 구현이 하나뿐인 인터페이스는 만들지 않는다.
 - **안 쓰는 기능은 만들지 않는다.** 트리거가 왔을 때 만든다. 미사용 코드는 틀렸는지 알 수 없다.
+  예외: 엔진의 범용 도구(Easing 함수들, Input의 Held/Released, Scene::HitTest 등)는 게임에서 곧 쓸 재사용 부품이라 유지.
 
 ## 주의할 것
 
@@ -56,7 +59,9 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
 - **`TypeIdOf<T>`는 이름(`hs::Visual`)의 해시.** 과제마다 같은 이름으로 컴포넌트를 만들면 ID가 겹친다 → 과제별 네임스페이스로.
 - `switch`에서 일부러 흘릴 때는 `[[fallthrough]];`.
 - **모듈 간 전방 선언 불가.** `friend class X;`는 X를 선언한 모듈 소속으로 만든다 → 같은 모듈(파티션)이어야 함. `Object`가 `hs.scene:object`인 이유.
+- **glm은 `hs.vec2`에서만 include.** 다른 모듈에서 include하면 `GLM_FORCE_CTOR_INIT`가 빠져 `Vec2` 정의가 둘이 됨(ODR). 필요한 glm 함수는 `hs.vec2`에 감싸서 추가.
 - **`auto` 반환 멤버 함수는 클래스 안에서 쓰는 곳보다 먼저 정의.** GCC는 본문을 순서대로 추론한다.
+- **import를 바꾼 뒤 `dependency cycle`이 나면** 소스가 아니라 ninja의 옛 기록일 수 있음 → `cmake-build-debug/.ninja_deps` 삭제 후 빌드.
 - 파일은 사용자가 동시에 편집하는 경우가 있다. **수정 전에 현재 내용을 확인할 것.**
 
 ## 코드 스타일

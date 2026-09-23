@@ -3,7 +3,9 @@ export module app04.rect;
 import std;
 import hs;
 
-export namespace hs
+using namespace hs;
+
+export namespace app04
 {
 	// 복귀 지점 = 처음 생성 위치
 	struct Home : IComponent

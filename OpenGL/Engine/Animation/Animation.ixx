@@ -2,8 +2,8 @@ export module hs.animation;
 
 import std;
 import hs.check;
-import hs.component;
-import hs.scene;
+export import hs.component;
+export import hs.scene;
 export import hs.type_id;
 
 // 충돌이 안 건드리는 값만 (크기·색·속력)

@@ -3,8 +3,8 @@ export module hs.scene:object;
 
 import std;
 import hs.check;
-import hs.shape;
-import hs.component;
+export import hs.transform;
+export import hs.component;
 import hs.type_id;
 
 export namespace hs

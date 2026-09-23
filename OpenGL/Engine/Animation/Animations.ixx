@@ -1,14 +1,12 @@
-module;
-#include <glm/glm.hpp>
-
 export module hs.animations;
 
 import std;
 import hs.check;
-import hs.shape;
+export import hs.vec2;
+import hs.color;
 import hs.easing;
 import hs.scene;
-import hs.animation;
+export import hs.animation;
 import hs.visual;
 
 export namespace hs

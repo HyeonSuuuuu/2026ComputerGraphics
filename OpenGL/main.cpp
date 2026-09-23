@@ -10,7 +10,7 @@ int main()
 {
 	try
 	{
-		hs::App04 app(800, 600);
+		app04::App04 app(800, 600);
 		app.Run();
 	}
 	catch (const std::exception& e)

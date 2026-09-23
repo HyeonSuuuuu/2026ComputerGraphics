@@ -3,8 +3,7 @@ module;
 
 export module hs.first_renderer;
 
-import hs.shape;
-import hs.renderer;
+export import hs.renderer;
 
 export namespace hs
 {

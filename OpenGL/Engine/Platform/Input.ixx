@@ -4,7 +4,7 @@ module;
 export module hs.input;
 
 import std;
-import hs.shape;
+export import hs.vec2;
 
 namespace hs
 {

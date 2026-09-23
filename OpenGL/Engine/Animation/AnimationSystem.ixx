@@ -3,7 +3,7 @@ export module hs.animation_system;
 import std;
 import hs.check;
 import hs.animation;
-import hs.scene;
+export import hs.scene;
 
 export namespace hs
 {

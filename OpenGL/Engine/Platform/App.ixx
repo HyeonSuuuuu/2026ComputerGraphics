@@ -5,9 +5,9 @@ module;
 export module hs.app;
 
 import std;
-import hs.shape;
-import hs.input;
-import hs.renderer;
+import hs.vec2;
+export import hs.input;
+export import hs.renderer;
 import hs.first_renderer;
 
 export namespace hs

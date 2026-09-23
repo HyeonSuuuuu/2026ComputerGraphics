@@ -1,12 +1,9 @@
-module;
-#include <glm/glm.hpp>
-
 export module hs.render_system;
 
-import hs.shape;
-import hs.renderer;
+import hs.transform;
+export import hs.renderer;
 import hs.visual;
-import hs.scene;
+export import hs.scene;
 
 export namespace hs
 {

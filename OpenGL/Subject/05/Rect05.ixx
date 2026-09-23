@@ -3,7 +3,9 @@
 import std;
 import hs;
 
-export namespace hs
+using namespace hs;
+
+export namespace app05
 {
     class Rect
     {

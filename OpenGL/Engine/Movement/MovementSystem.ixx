@@ -1,13 +1,10 @@
-module;
-#include <glm/glm.hpp>
-
 export module hs.movement_system;
 
 import std;
 import hs.check;
-import hs.shape;
+import hs.transform;
 import hs.movement;
-import hs.scene;
+export import hs.scene;
 
 export namespace hs
 {

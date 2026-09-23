@@ -7,7 +7,9 @@ import std;
 import hs;
 import app04.rect;
 
-export namespace hs
+using namespace hs;
+
+export namespace app04
 {
 	class App04 : public App
 	{

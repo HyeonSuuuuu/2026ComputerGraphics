@@ -7,7 +7,9 @@ import std;
 import hs;
 import app05.rect;
 
-export namespace hs
+using namespace hs;
+
+export namespace app05
 {
 	struct Spawned : IComponent { };
 	

@@ -1,11 +1,8 @@
-module;
-#include <glm/glm.hpp>
-
 export module hs.movement;
 
 import std;
-import hs.shape;
-import hs.component;
+export import hs.transform;
+export import hs.component;
 
 // 위치·속도. 충돌이 바꾸는 값
 export namespace hs

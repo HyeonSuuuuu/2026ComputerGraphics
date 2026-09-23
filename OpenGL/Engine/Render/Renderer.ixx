@@ -1,7 +1,8 @@
 export module hs.renderer;
 
 import std;
-import hs.shape;
+export import hs.color;
+export import hs.transform;
 
 export namespace hs
 {

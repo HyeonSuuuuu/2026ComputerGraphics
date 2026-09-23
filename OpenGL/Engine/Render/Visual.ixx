@@ -1,7 +1,7 @@
 export module hs.visual;
 
-import hs.shape;
-import hs.component;
+export import hs.color;
+export import hs.component;
 
 export namespace hs
 {

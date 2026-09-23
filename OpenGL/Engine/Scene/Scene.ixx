@@ -2,7 +2,7 @@ export module hs.scene;
 
 import std;
 import hs.check;
-import hs.shape;
+import hs.transform;
 
 export import :object;
 
