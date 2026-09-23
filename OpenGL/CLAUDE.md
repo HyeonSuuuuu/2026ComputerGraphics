@@ -35,7 +35,8 @@ Engine/Platform   App(창·루프·입력), Input
 ```
 
 프레임 순서는 앱의 `Update`에 그대로 보인다:
-`AnimationSystem → MovementSystem → CollisionSystem → Scene::Flush`
+`입력 처리(Spawn/Destroy) → Scene::Flush → AnimationSystem → MovementSystem → CollisionSystem`
+Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템 대상.
 
 ## 설계 규칙
 
