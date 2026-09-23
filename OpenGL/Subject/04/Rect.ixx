@@ -24,9 +24,9 @@ export namespace app04
 			object.Add<Home>(pos);
 			object.Add<Visual>(RandomColor());
 			object.Add<Mover>(Velocity{ .dir = RandomDiagonal(), .speed = Speed });
-			Animator& animator = object.Add<Animator>();
-			animator.Add<ScalePulse>();
-			animator.Add<ColorCycle>(3.f, Random(0.f, 1.f));	// 시작 색 분산
+			EffectStack& effects = object.Add<EffectStack>();
+			effects.Add<ScalePulse>();
+			effects.Add<ColorCycle>(3.f, Random(0.f, 1.f));	// 시작 색 분산
 			
 			return object;
 		}

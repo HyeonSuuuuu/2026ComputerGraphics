@@ -25,25 +25,28 @@ main.cpp          실행할 과제 앱 선택
 Subject/NN        과제별 앱과 게임 쪽 컴포넌트 (네임스페이스 appNN)
 Template          새 과제 시작용 뼈대
 Engine/Core       Check(단언), Component(IComponent), Random, TypeId(리플렉션 이름 해시)
-Engine/Math       Vec2(glm 래핑), Bounds(AABB), Easing
+Engine/Math       Vec2(glm 래핑·Approach), Bounds(AABB), Easing
 Engine/Scene      Transform(pos·size), Object(컴포넌트 컨테이너), Scene(소유·조회)
 Engine/Movement   Mover, IMovementMode(ZigZag·Follow·EdgePatrol), MovementSystem
-Engine/Animation  IAnimation·Animator·Playback, Animations(ScalePulse·ColorCycle·ScaleIn·SizeChase), AnimationSystem
+Engine/Effect     IEffect·EffectStack·Playback, Effects(ScalePulse·ColorCycle·ScaleIn), EffectSystem
 Engine/Collision  CollisionSystem(경계·Separate·FindContacts, Trigger), ContactTracker(Enter/Stay/Exit)
 Engine/Render     Color(HSV·RandomColor), IRenderer, FirstRenderer(고정 파이프라인), Visual, RenderSystem
 Engine/Platform   App(창·루프·입력), Input
 ```
 
 프레임 순서는 앱의 `Update`에 그대로 보인다:
-`입력 처리(Spawn/Destroy) → Scene::Flush → AnimationSystem → MovementSystem → CollisionSystem`
+`입력 처리(Spawn/Destroy) → Scene::Flush → (게임 로직) → EffectSystem → MovementSystem → CollisionSystem`
 Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템 대상.
 
 ## 설계 규칙
 
 - **데이터와 실행을 나눈다.** 컴포넌트는 데이터, 시스템이 돌린다. `Object`에 로직을 넣지 않는다.
-- **Movement는 위치와 속도**를 다룬다(충돌이 이 값들을 바꾼다). **Animation은 충돌이 바꾸지 않는 값**(크기·색·속력)을 시간 함수로 정한다. `transform.size`는 판정에 쓰이므로, 보이는 크기만 바꿀 때는 `Visual.effectScale`.
+- **Movement는 위치와 속도**를 다룬다(충돌이 이 값들을 바꾼다).
+- **Effect는 `Visual`만 바꾼다.** 기준은 "꺼도 게임 결과가 같은가". `IEffect`가 `Visual&`만 받아 타입으로 강제된다.
+  게임 결과가 달라지는 변화(먹으면 커짐 등)는 게임 로직이나 시스템이 한다(`App05::Grow` + `Approach`).
+  `Animation`이라는 이름은 나중의 스프라이트·키프레임 애니메이션용으로 비워 둔다.
 - **종류는 상속이 아니라 구성으로.** `Object`를 상속하지 않는다. 종류가 다르면 붙이는 컴포넌트가 다른 것이고, 조립은 게임 쪽 함수가 한다(`Rect::Spawn`).
-- **상속은 "끼우는 자리"에만** — `App` 계층, `IMovementMode`, `IAnimation`, `IRenderer`, `IComponent`.
+- **상속은 "끼우는 자리"에만** — `App` 계층, `IMovementMode`, `IEffect`, `IRenderer`, `IComponent`.
 - **컴포넌트는 게임 쪽에서 정의한다.** `struct Health : IComponent` 하면 끝이고 엔진은 안 바뀐다(예: `Subject/04/Rect.ixx`의 `Home`).
 - **게임 코드는 `hs` 밖에.** 과제마다 `appNN` 네임스페이스, 파일 위에 `using namespace hs;`.
 - **의존 방향은 Core·Math → Scene·Render → 시스템 → 게임.** 아래층이 위층을 import하지 않는다.
@@ -57,6 +60,9 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
 - **순회 중 Spawn/Destroy는 예약된다.** 다음 `Scene::Flush()`에서 반영된다. 직접 벡터를 건드리지 말 것.
 - **`Get<T>()`는 정확히 같은 타입만 찾는다.** 컴포넌트를 상속하면 조용히 못 찾는다.
 - **`TypeIdOf<T>`는 이름(`hs::Visual`)의 해시.** 과제마다 같은 이름으로 컴포넌트를 만들면 ID가 겹친다 → 과제별 네임스페이스로.
+  이름은 리플렉션으로 타입을 분해해 조립(`Tween<const app04::Home*>`까지). 통째로 `display_string_of`를 쓰면 안 됨:
+  GCC가 import한 쪽에서만 `@모듈`을 붙여, 정의한 모듈과 쓰는 모듈의 ID가 달라진다(`Get`이 조용히 nullptr).
+  배열·함수 타입·volatile·enum 값 인자·익명 네임스페이스 타입은 컴파일 에러 → 필요해지면 `Name()`에 규칙 추가.
 - `switch`에서 일부러 흘릴 때는 `[[fallthrough]];`.
 - **모듈 간 전방 선언 불가.** `friend class X;`는 X를 선언한 모듈 소속으로 만든다 → 같은 모듈(파티션)이어야 함. `Object`가 `hs.scene:object`인 이유.
 - **glm은 `hs.vec2`에서만 include.** 다른 모듈에서 include하면 `GLM_FORCE_CTOR_INIT`가 빠져 `Vec2` 정의가 둘이 됨(ODR). 필요한 glm 함수는 `hs.vec2`에 감싸서 추가.

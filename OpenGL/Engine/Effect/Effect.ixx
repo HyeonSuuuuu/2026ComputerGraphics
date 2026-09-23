@@ -1,12 +1,12 @@
-export module hs.animation;
+export module hs.effect;
 
 import std;
 import hs.check;
 export import hs.component;
-export import hs.scene;
+export import hs.visual;
 export import hs.type_id;
 
-// 충돌이 안 건드리는 값만 (크기·색·속력)
+// 보이는 것(Visual)만 바꿈 → 꺼도 게임 결과는 같아야 함. 게임 값 변화는 게임 로직·시스템 몫
 export namespace hs
 {
 	// 왕복 여부는 이징 담당
@@ -40,20 +40,19 @@ export namespace hs
 		float _time{};
 	};
 
-	// 위치 제외: 속도로 표현해야 경계 처리 적용
-	class IAnimation
+	class IEffect
 	{
 	public:
-		virtual ~IAnimation() = default;
+		virtual ~IEffect() = default;
 
-		virtual void Update(Object& object, float dt) = 0;
+		virtual void Update(Visual& visual, float dt) = 0;
 
 		// 끄기와 되돌리기를 한 곳에. 따로 두면 한쪽 누락
-		void SetEnabled(Object& object, bool on)
+		void SetEnabled(Visual& visual, bool on)
 		{
 			_enabled = on;
 			if (!on)
-				Restore(object);
+				Restore(visual);
 		}
 
 		bool IsEnabled() const { return _enabled; }
@@ -61,37 +60,37 @@ export namespace hs
 		// true면 목록에서 제거
 		virtual bool IsFinished() const { return false; }
 
-		virtual void Restore(Object&) {}
+		virtual void Restore(Visual&) {}
 
 	private:
 		bool _enabled{ true };
 	};
 
 	// 서로 다른 값 담당 → 동시 실행 가능
-	struct Animator : IComponent
+	struct EffectStack : IComponent
 	{
 		template<class T, class... Args>
 		T& Add(Args&&... args)
 		{
-			static_assert(std::derived_from<T, IAnimation>, "애니메이션은 IAnimation을 상속해야 한다");
+			static_assert(std::derived_from<T, IEffect>, "이펙트는 IEffect를 상속해야 한다");
 			Check(!Get<T>(), "이미 붙어 있다. 값을 바꾸려면 Get을 쓸 것");
 
 			auto created = std::make_unique<T>(std::forward<Args>(args)...);
 			T& added = *created;
-			animations.emplace_back(TypeIdOf<T>, std::move(created));
+			effects.emplace_back(TypeIdOf<T>, std::move(created));
 			return added;
 		}
 
 		template<class T>
 		T* Get()
 		{
-			for (auto& [type, animation] : animations)
+			for (auto& [type, effect] : effects)
 				if (type == TypeIdOf<T>)
-					return static_cast<T*>(animation.get());
+					return static_cast<T*>(effect.get());
 			return nullptr;
 		}
 
-		std::vector<std::pair<TypeId, std::unique_ptr<IAnimation>>> animations;
+		std::vector<std::pair<TypeId, std::unique_ptr<IEffect>>> effects;
 		bool enabled{ true };
 	};
 }

@@ -35,8 +35,8 @@ export namespace app04
 					Object& object = Rect::Spawn(_scene, input.MousePos());
 					Mover* mover = object.Get<Mover>();
 					ApplyMotion(object);
-					SetAnimation<ScalePulse>(object, _pulsing);
-					SetAnimation<ColorCycle>(object, _coloring);
+					SetEffect<ScalePulse>(object, _pulsing);
+					SetEffect<ColorCycle>(object, _coloring);
 					mover->enabled = _moving;
 				}
 			}
@@ -69,14 +69,14 @@ export namespace app04
 			{
 				_pulsing = !_pulsing;
 				for (Object& object : _scene.Objects())
-					SetAnimation<ScalePulse>(object, _pulsing);
+					SetEffect<ScalePulse>(object, _pulsing);
 			}
 			
 			if (input.IsKeyPressed(GLFW_KEY_5))
 			{
 				_coloring = !_coloring;
 				for (Object& object : _scene.Objects())
-					SetAnimation<ColorCycle>(object, _coloring);
+					SetEffect<ColorCycle>(object, _coloring);
 			}
 			
 			if (input.IsKeyPressed(GLFW_KEY_S))
@@ -88,8 +88,8 @@ export namespace app04
 				ApplyEnabled();
 				for (Object& object : _scene.Objects())
 				{
-					SetAnimation<ScalePulse>(object, false);
-					SetAnimation<ColorCycle>(object, false);
+					SetEffect<ScalePulse>(object, false);
+					SetEffect<ColorCycle>(object, false);
 				}
 			}
 			
@@ -103,7 +103,7 @@ export namespace app04
 
 			_scene.Flush();						// 목록 확정. 이번 프레임 생성분도 아래 시스템 대상
 
-			AnimationSystem::Tick(_scene, dt);
+			EffectSystem::Tick(_scene, dt);
 			MovementSystem::Tick(_scene, dt);
 			CollisionSystem::Tick(_scene);
 		}
@@ -174,11 +174,15 @@ export namespace app04
 		}
 
 		template<class T>
-		void SetAnimation(Object& object, bool on)
+		void SetEffect(Object& object, bool on)
 		{
-			if (Animator* animator = object.Get<Animator>())
-				if (T* animation = animator->Get<T>())
-					animation->SetEnabled(object, on);
+			EffectStack* stack = object.Get<EffectStack>();
+			Visual* visual = object.Get<Visual>();
+			if (!stack || !visual)
+				return;
+
+			if (T* effect = stack->Get<T>())
+				effect->SetEnabled(*visual, on);
 		}
 
 		// 방향·모드 유지, 정지만

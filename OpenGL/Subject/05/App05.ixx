@@ -12,7 +12,15 @@ using namespace hs;
 export namespace app05
 {
 	struct Spawned : IComponent { };
-	
+
+	// 먹을수록 커지는 목표 크기. 실제 크기는 Grow가 따라감
+	struct Growth : IComponent
+	{
+		explicit Growth(Vec2 target) : target(target) {}
+
+		Vec2 target;
+	};
+
 	
 	class App05 : public App
 	{
@@ -54,7 +62,8 @@ export namespace app05
 
 			_scene.Flush(); // 목록 확정. 이번 프레임 생성분도 아래 시스템 대상
 
-			AnimationSystem::Tick(_scene, dt);
+			Grow(dt);
+			EffectSystem::Tick(_scene, dt);
 			MovementSystem::Tick(_scene, dt);
 			CollisionSystem::Tick(_scene);
 			CollisionSystem::Separate(_scene);
@@ -109,16 +118,22 @@ export namespace app05
 			return { width, area / width };
 		}
 
-		// transform 기준 성장 → 판정 범위도 함께 확대
+		// transform.size를 키움 → 판정 범위도 함께 확대
+		void Grow(float dt)
+		{
+			for (Object& object : _scene.Objects())
+				if (Growth* growth = object.Get<Growth>())
+					object.transform.size = Approach(object.transform.size, growth->target, GrowRate, dt);
+		}
+
 		void Eat(Object& eraser, Object& target)
 		{
 			if (Visual* eaten = target.Get<Visual>())
 				if (Visual* visual = eraser.Get<Visual>())
 					visual->color = eaten->color;
-			
-			// 실제 크기 대신 목표 확대. 추종은 SizeChase 담당
-			if (SizeChase* chase = eraser.Get<Animator>()->Get<SizeChase>())
-				chase->SetTarget(Merged(chase->Target(), target.transform.size));
+
+			if (Growth* growth = eraser.Get<Growth>())
+				growth->target = Merged(growth->target, target.transform.size);
 			
 			if (target.Get<Spawned>() != nullptr)
 				_createCount--;
@@ -133,9 +148,8 @@ export namespace app05
 				Object& eraser = _scene.Spawn({ .pos = input.MousePos(), .size = { EraserSize, EraserSize } });
 				eraser.Add<Visual>(Color{ 0.f, 0.f, 0.f });
 				eraser.Add<Trigger>();
-				Animator& animator = eraser.Add<Animator>();
-				animator.Add<ScaleIn>(0.f, 0.3f);
-				animator.Add<SizeChase>(Vec2{ EraserSize, EraserSize });
+				eraser.Add<EffectStack>().Add<ScaleIn>(0.f, 0.3f);
+				eraser.Add<Growth>(Vec2{ EraserSize, EraserSize });
 				_eraser = eraser.Id();
 				return;						// 목록 반영은 아래 Flush
 			}
@@ -162,6 +176,7 @@ export namespace app05
 		static constexpr Color				Background{ 1.f, 1.f, 1.f };
 		static constexpr float			Gap = 0.02f;			// 사각형 사이 최소 간격
 		static constexpr float			EraserSize = Rect::Size * 2.f;
+		static constexpr float			GrowRate = 10.f;		// 초당 남은 차이의 비율
 		static constexpr Color			HitColor{ 1.f, 0.2f, 0.2f };
 		static constexpr Color			RestColor{ 0.3f, 0.6f, 1.f };
 		static constexpr int			MaxCreateRect = 10;
