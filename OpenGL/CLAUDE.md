@@ -28,8 +28,8 @@ Engine/Core       Check(단언), Component(IComponent), Random
 Engine/Math       Shape(Vec2·Transform·Bounds·Color), Easing
 Engine/Scene      Object(컴포넌트 컨테이너), Scene(소유·조회)
 Engine/Movement   Mover, IMovementMode(ZigZag·Follow·EdgePatrol), MovementSystem
-Engine/Animation  IAnimation·Animator·Playback, Animations(ScalePulse·ColorCycle), AnimationSystem
-Engine/Collision  CollisionSystem (지금은 경계만, 오브젝트 충돌도 여기에)
+Engine/Animation  IAnimation·Animator·Playback, Animations(ScalePulse·ColorCycle·ScaleIn·SizeChase), AnimationSystem
+Engine/Collision  CollisionSystem(경계·Separate·FindContacts), ContactTracker(Enter/Stay/Exit), Trigger
 Engine/Render     IRenderer, FirstRenderer(고정 파이프라인), Visual, RenderSystem
 Engine/Platform   App(창·루프·입력), Input
 ```
@@ -51,7 +51,7 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
 
 ## 주의할 것
 
-- **순회 중 Spawn/Destroy는 예약된다.** `Scene::Flush()`가 프레임 끝에 반영한다. 직접 벡터를 건드리지 말 것.
+- **순회 중 Spawn/Destroy는 예약된다.** 다음 `Scene::Flush()`에서 반영된다. 직접 벡터를 건드리지 말 것.
 - **`Get<T>()`는 정확히 같은 타입만 찾는다.** 컴포넌트를 상속하면 조용히 못 찾는다.
 - `switch`에서 일부러 흘릴 때는 `[[fallthrough]];`.
 - **모듈 간 전방 선언 불가.** `friend class X;`는 X를 선언한 모듈 소속으로 만든다 → 같은 모듈(파티션)이어야 함. `Object`가 `hs.scene:object`인 이유.
