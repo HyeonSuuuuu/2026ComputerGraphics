@@ -25,6 +25,7 @@ export namespace hs
 			return _time / _duration;
 		}
 
+		// pre 대신 Check: 이 파일에 pre를 쓰면 GCC 16.2 내부 오류(ICE, gimplify.cc)
 		void Seek(float phase)
 		{
 			Check(phase >= 0.f && phase <= 1.f, "위상은 0~1이다");

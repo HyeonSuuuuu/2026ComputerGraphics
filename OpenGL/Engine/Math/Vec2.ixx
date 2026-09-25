@@ -30,6 +30,7 @@ export namespace hs
 
 	// 목표를 향해 매 프레임 남은 거리의 rate·dt만큼. 목표가 바뀌어도 이어지고, 큰 dt에서도 넘치지 않음
 	Vec2 Approach(Vec2 current, Vec2 target, float rate, float dt)
+		pre (rate >= 0.f && dt >= 0.f)
 	{
 		return current + (target - current) * glm::min(rate * dt, 1.f);
 	}

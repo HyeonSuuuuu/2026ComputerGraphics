@@ -19,6 +19,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 # typeid, dynamic_cast 금지, 타입 구분은 hs.type_id로
 string(APPEND CMAKE_CXX_FLAGS " -fno-rtti")
+# 컨트랙트(pre·contract_assert): Debug는 위반 시 출력 후 중단, 그 외엔 검사 안 함 (Check와 같게)
+string(APPEND CMAKE_CXX_FLAGS " -fcontracts")
+string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fcontract-evaluation-semantic=enforce")
+foreach(config RELEASE RELWITHDEBINFO MINSIZEREL)
+	string(APPEND CMAKE_CXX_FLAGS_${config} " -fcontract-evaluation-semantic=ignore")
+endforeach()
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)

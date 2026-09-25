@@ -129,10 +129,10 @@ export namespace hs
 	{
 	public:
 		explicit FollowMode(TargetFn target, float arriveRadius = 0.01f)
+			pre (arriveRadius >= 0.f)
 			: _target(std::move(target)), _arriveRadius(arriveRadius)
 		{
 			Check(_target != nullptr, "목표를 읽을 방법이 없다");
-			Check(arriveRadius >= 0.f);
 		}
 
 		explicit FollowMode(Vec2 target, float arriveRadius = 0.01f)

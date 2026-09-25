@@ -85,8 +85,8 @@ export namespace hs
 
 		// 레벨 변경 시에만 갱신
 		void SetBounds(Bounds bounds)
+			pre (bounds.min.x <= bounds.max.x && bounds.min.y <= bounds.max.y)
 		{
-			Check(bounds.min.x <= bounds.max.x && bounds.min.y <= bounds.max.y, "bounds의 min과 max가 뒤집혀 있다");
 			_bounds = bounds;
 		}
 
