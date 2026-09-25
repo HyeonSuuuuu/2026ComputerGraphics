@@ -1,23 +1,15 @@
 // World(ECS) 동작 고정용. World 속을 바꾼 뒤 이게 전부 O면 겉보기 동작은 그대로
-// std::println 대신 cout: GCC 모듈에서 println 내부 정적 데이터가 Check.ixx와 겹쳐 링크 충돌
+export module engine_test.world;
 
 import std;
 import hs.world;
+import engine_test.expect;
 import engine_test.components;
 
 using namespace hs;
 using namespace engine_test;
 
-int failed = 0;
-
-void Expect(bool ok, std::string_view what)
-{
-	if (!ok)
-		++failed;
-	std::cout << "  " << (ok ? "O" : "X") << ' ' << what << '\n';
-}
-
-int main()
+export void RunWorldTests()
 {
 	World world;
 
@@ -94,7 +86,4 @@ int main()
 	std::cout << "[Clear]\n";
 	world.Clear();
 	Expect(!c && world.Size() == 0 && !world.Find(d.Id()), "Clear 후 전부 무효");
-
-	std::cout << '\n' << (failed == 0 ? "전부 통과" : "실패 있음") << '\n';
-	return failed;
 }

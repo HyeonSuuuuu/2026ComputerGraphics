@@ -114,6 +114,7 @@ export namespace hs
 		virtual void Render() {}
 
 		void Close() { glfwSetWindowShouldClose(_window, true); }
+		void SetTitle(const std::string& title) { glfwSetWindowTitle(_window, title.c_str()); }
 		GLFWwindow* GetWindow() const { return _window; }
 		const Input& GetInput() const { return _input; }
 		IRenderer& GetRenderer() { return *_renderer; }

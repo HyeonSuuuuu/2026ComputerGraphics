@@ -26,7 +26,8 @@ main.cpp          실행할 과제 앱 선택
 Subject/NN        과제별 앱과 게임 쪽 컴포넌트 (네임스페이스 appNN)
 Template          새 과제 시작용 뼈대
 Tests             EngineTests: World(ECS) 동작 고정. 컴포넌트를 다른 모듈에서 Add하는 경우 포함
-Engine/Core       Check(단언), Random, TypeId(이름 해시·타입 순번), SparseSet
+Engine/Core       Check(단언·컨트랙트 처리), Random, TypeId(이름 해시·타입 순번), SparseSet,
+                  Enums(EnumToString·StringToEnum·EnumCount), Text(Format)
 Engine/Math       Vec2(glm 래핑·Approach), Bounds(AABB), Easing
 Engine/World      World(한 판 전체: 조립·조회·Each), Entity(번호표 손잡이), EntityTable(생존·세대·Flush),
                   ComponentPools(타입별 SparseSet 저장소), Transform(pos·size)
@@ -74,6 +75,8 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
 - **모듈 간 전방 선언 불가.** `friend class X;`는 X를 선언한 모듈 소속으로 만든다 → 같은 모듈이어야 함. `Entity`와 `World`가 한 파일인 이유이기도 함.
 - **모듈 인터페이스의 `inline` 함수 안 `static` 금지.** GCC가 import한 파일마다 따로 만들어 링크 충돌(`NextTypeIndex` 주석). `inline` 없이 정의하면 한 곳에만 생긴다.
 - **glm은 `hs.vec2`에서만 include.** 다른 모듈에서 include하면 `GLM_FORCE_CTOR_INIT`가 빠져 `Vec2` 정의가 둘이 됨(ODR). 필요한 glm 함수는 `hs.vec2`에 감싸서 추가.
+- **`std::format`·`std::println` 대신 `hs::Format`.** 여러 모듈에서 직접 쓰면 GCC 16이 format 내부 정적 데이터를
+  모듈마다 만들어 링크 충돌(`multiple definition of ...__write_escaped_unicode_part`). 출력은 `std::cout << Format(...)`.
 - **`auto` 반환 멤버 함수는 클래스 안에서 쓰는 곳보다 먼저 정의.** GCC는 본문을 순서대로 추론한다.
 - **`pre`에서 GCC 내부 오류(ICE, gimplify.cc)가 나면 그 자리는 `Check`로.** `Effect.ixx`의 `Playback::Seek`가 그 경우(GCC 16.2).
 - **import를 바꾼 뒤 `dependency cycle`이 나면** 소스가 아니라 ninja의 옛 기록일 수 있음 → `cmake-build-debug/.ninja_deps` 삭제 후 빌드.

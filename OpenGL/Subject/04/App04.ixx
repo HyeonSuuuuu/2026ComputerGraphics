@@ -20,6 +20,8 @@ export namespace app04
 		{
 			// 맵 범위가 화면과 다를 때만
 			// _world.SetBounds({ .min{ -1.f, -1.f }, .max{ 1.f, 1.f } });
+
+			UpdateTitle();
 		}
 
 	protected:
@@ -58,6 +60,7 @@ export namespace app04
 						_moving = true;
 						ApplyMotion();
 					}
+					UpdateTitle();
 				};
 
 			motionKey(GLFW_KEY_1, Motion::Diagonal);
@@ -86,6 +89,7 @@ export namespace app04
 				_coloring = false;
 
 				ApplyEnabled();
+				UpdateTitle();
 				for (Entity entity : _world.Entities())
 				{
 					SetEffect<ScalePulse>(entity, false);
@@ -191,6 +195,12 @@ export namespace app04
 			for (Entity entity : _world.Entities())
 				if (Mover* mover = entity.Get<Mover>())
 					mover->enabled = _moving;
+		}
+
+		// 모드·정지가 바뀔 때만 부름: 창 제목 변경은 운영체제 호출
+		void UpdateTitle()
+		{
+			SetTitle(Format("App04 - {}{}", EnumToString(_motion), _moving ? "" : " (정지)"));
 		}
 
 
