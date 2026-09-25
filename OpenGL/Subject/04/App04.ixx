@@ -19,7 +19,7 @@ export namespace app04
 			: Super(width, height, "App04")
 		{
 			// 맵 범위가 화면과 다를 때만
-			// _scene.SetBounds({ .min{ -1.f, -1.f }, .max{ 1.f, 1.f } });
+			// _world.SetBounds({ .min{ -1.f, -1.f }, .max{ 1.f, 1.f } });
 		}
 
 	protected:
@@ -30,13 +30,13 @@ export namespace app04
 
 			if (input.IsMousePressed(GLFW_MOUSE_BUTTON_LEFT))
 			{
-				if (_scene.Size() < MaxSpawnRect)
+				if (_world.Size() < MaxSpawnRect)
 				{
-					Object object = Rect::Spawn(_scene, input.MousePos());
-					Mover* mover = object.Get<Mover>();
-					ApplyMotion(object);
-					SetEffect<ScalePulse>(object, _pulsing);
-					SetEffect<ColorCycle>(object, _coloring);
+					Entity entity = Rect::Spawn(_world, input.MousePos());
+					Mover* mover = entity.Get<Mover>();
+					ApplyMotion(entity);
+					SetEffect<ScalePulse>(entity, _pulsing);
+					SetEffect<ColorCycle>(entity, _coloring);
 					mover->enabled = _moving;
 				}
 			}
@@ -68,15 +68,15 @@ export namespace app04
 			if (input.IsKeyPressed(GLFW_KEY_4))
 			{
 				_pulsing = !_pulsing;
-				for (Object object : _scene.Objects())
-					SetEffect<ScalePulse>(object, _pulsing);
+				for (Entity entity : _world.Entities())
+					SetEffect<ScalePulse>(entity, _pulsing);
 			}
 			
 			if (input.IsKeyPressed(GLFW_KEY_5))
 			{
 				_coloring = !_coloring;
-				for (Object object : _scene.Objects())
-					SetEffect<ColorCycle>(object, _coloring);
+				for (Entity entity : _world.Entities())
+					SetEffect<ColorCycle>(entity, _coloring);
 			}
 			
 			if (input.IsKeyPressed(GLFW_KEY_S))
@@ -86,41 +86,41 @@ export namespace app04
 				_coloring = false;
 
 				ApplyEnabled();
-				for (Object object : _scene.Objects())
+				for (Entity entity : _world.Entities())
 				{
-					SetEffect<ScalePulse>(object, false);
-					SetEffect<ColorCycle>(object, false);
+					SetEffect<ScalePulse>(entity, false);
+					SetEffect<ColorCycle>(entity, false);
 				}
 			}
 			
 
 			
 			if (input.IsKeyPressed(GLFW_KEY_R))
-				_scene.Clear();
+				_world.Clear();
 			
 			if (input.IsKeyPressed(GLFW_KEY_Q))
 				Close();
 
-			_scene.Flush();						// 목록 확정. 이번 프레임 생성분도 아래 시스템 대상
+			_world.Flush();						// 목록 확정. 이번 프레임 생성분도 아래 시스템 대상
 
-			EffectSystem::Tick(_scene, dt);
-			MovementSystem::Tick(_scene, dt);
-			CollisionSystem::Tick(_scene);
+			EffectSystem::Tick(_world, dt);
+			MovementSystem::Tick(_world, dt);
+			CollisionSystem::Tick(_world);
 		}
 
 		void Render() override
 		{
 			auto& renderer = GetRenderer();
 			renderer.Clear({ 0.15f, 0.15f, 0.18f });
-			RenderSystem::Draw(_scene, renderer);
+			RenderSystem::Draw(_world, renderer);
 		}
 
 	private:
 		enum class Motion { Diagonal, ZigZag, EdgePatrol, Home };
 		
-		void ApplyMotion(Object object)
+		void ApplyMotion(Entity entity)
 		{
-			Mover* mover = object.Get<Mover>();
+			Mover* mover = entity.Get<Mover>();
 			if (!mover)
 				return;
 
@@ -139,7 +139,7 @@ export namespace app04
 				break;
 
 			case Motion::Home:
-				if (Home* home = object.Get<Home>())
+				if (Home* home = entity.Get<Home>())
 					mover->SetMode(std::make_unique<FollowMode>(home->pos));
 				mover->boundsResponse = BoundsResponse::Clamp;
 				mover->velocity.speed = Rect::Speed;	// 도착 시 FollowMode가 0으로
@@ -160,13 +160,13 @@ export namespace app04
 
 		void ApplyMotion()
 		{
-			for (Object object : _scene.Objects())
-				ApplyMotion(object);
+			for (Entity entity : _world.Entities())
+				ApplyMotion(entity);
 		}
 		
 		Bounds PatrolArea() const
 		{
-			Bounds area = _scene.WorldBounds();
+			Bounds area = _world.WorldBounds();
 			const float half = Rect::Size / 2.f;
 			area.min += Vec2{ half, half };
 			area.max -= Vec2{ half, half };
@@ -174,10 +174,10 @@ export namespace app04
 		}
 
 		template<class T>
-		void SetEffect(Object object, bool on)
+		void SetEffect(Entity entity, bool on)
 		{
-			EffectStack* stack = object.Get<EffectStack>();
-			Visual* visual = object.Get<Visual>();
+			EffectStack* stack = entity.Get<EffectStack>();
+			Visual* visual = entity.Get<Visual>();
 			if (!stack || !visual)
 				return;
 
@@ -188,13 +188,13 @@ export namespace app04
 		// 방향·모드 유지, 정지만
 		void ApplyEnabled()
 		{
-			for (Object object : _scene.Objects())
-				if (Mover* mover = object.Get<Mover>())
+			for (Entity entity : _world.Entities())
+				if (Mover* mover = entity.Get<Mover>())
 					mover->enabled = _moving;
 		}
 
 
-		Scene							_scene;
+		World							_world;
 		Motion							_motion = Motion::Diagonal;
 		bool							_moving = false;
 		bool							_pulsing = false;

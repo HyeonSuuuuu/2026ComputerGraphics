@@ -25,26 +25,43 @@ find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 
-file(GLOB_RECURSE MODULES CONFIGURE_DEPENDS
-	Engine/*.ixx
-	Subject/*.ixx
-	Template/*.ixx
-)
+# 모듈 파일(.ixx)을 target에 등록. GCC는 .ixx 확장자를 모름
+function(hs_add_modules target)
+	file(GLOB_RECURSE modules CONFIGURE_DEPENDS ${ARGN})
+	target_sources(${target} PUBLIC FILE_SET CXX_MODULES FILES ${modules})
+	set_source_files_properties(${modules} PROPERTIES LANGUAGE CXX)
+endfunction()
 
-add_executable(OpenGL main.cpp)
-target_sources(OpenGL PRIVATE FILE_SET CXX_MODULES FILES ${MODULES})
-
-# GCC는 .ixx 확장자를 모름
-set_source_files_properties(${MODULES} PROPERTIES LANGUAGE CXX)
-
-target_compile_options(OpenGL PRIVATE -freflection -Wall -Wextra)
-target_link_libraries(OpenGL PRIVATE OpenGL::GL glfw GLEW::GLEW glm::glm stdc++exp)
-
-# MSYS2 PATH 밖(Rider·탐색기)에서도 실행되도록: 런타임은 정적 링크, glfw·glew DLL은 exe 옆에 복사
-target_link_options(OpenGL PRIVATE -static-libgcc -static-libstdc++)
+# MSYS2 PATH 밖(Rider·탐색기)에서도 실행되도록: 런타임은 정적 링크, 필요한 DLL은 exe 옆에 복사
 cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH TOOLCHAIN_BIN)
-add_custom_command(TARGET OpenGL POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		$<TARGET_RUNTIME_DLLS:OpenGL> ${TOOLCHAIN_BIN}/libwinpthread-1.dll $<TARGET_FILE_DIR:OpenGL>
-	COMMAND_EXPAND_LISTS
-)
+function(hs_runnable target)
+	target_compile_options(${target} PRIVATE -Wall -Wextra)
+	target_link_options(${target} PRIVATE -static-libgcc -static-libstdc++)
+	add_custom_command(TARGET ${target} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			$<TARGET_RUNTIME_DLLS:${target}> ${TOOLCHAIN_BIN}/libwinpthread-1.dll $<TARGET_FILE_DIR:${target}>
+		COMMAND_EXPAND_LISTS
+	)
+endfunction()
+
+# ── 엔진: 게임과 테스트가 함께 쓰는 라이브러리 ──────────────────────────────
+add_library(Engine STATIC)
+hs_add_modules(Engine Engine/*.ixx)
+target_compile_options(Engine PRIVATE -Wall -Wextra PUBLIC -freflection)
+target_link_libraries(Engine PUBLIC OpenGL::GL glfw GLEW::GLEW glm::glm stdc++exp)
+
+# ── 게임 ───────────────────────────────────────────────────────────────────
+add_executable(OpenGL main.cpp)
+hs_add_modules(OpenGL Subject/*.ixx Template/*.ixx)
+target_link_libraries(OpenGL PRIVATE Engine)
+hs_runnable(OpenGL)
+
+# ── 테스트: 실행해서 X가 하나라도 나오면 실패(종료 코드 = 실패 수) ─────────────
+enable_testing()
+add_executable(EngineTests)
+file(GLOB test_sources CONFIGURE_DEPENDS Tests/*.cpp)
+target_sources(EngineTests PRIVATE ${test_sources})
+hs_add_modules(EngineTests Tests/*.ixx)
+target_link_libraries(EngineTests PRIVATE Engine)
+hs_runnable(EngineTests)
+add_test(NAME EngineTests COMMAND EngineTests)

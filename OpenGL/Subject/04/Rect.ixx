@@ -18,17 +18,17 @@ export namespace app04
 	class Rect
 	{
 	public:
-		static Object Spawn(Scene& scene, Vec2 pos)
+		static Entity Spawn(World& world, Vec2 pos)
 		{
-			Object object = scene.Spawn({ .pos = pos, .size = { Size, Size } });
-			object.Add<Home>(pos);
-			object.Add<Visual>(RandomColor());
-			object.Add<Mover>(Velocity{ .dir = RandomDiagonal(), .speed = Speed });
-			EffectStack& effects = object.Add<EffectStack>();
+			Entity entity = world.Spawn({ .pos = pos, .size = { Size, Size } });
+			entity.Add<Home>(pos);
+			entity.Add<Visual>(RandomColor());
+			entity.Add<Mover>(Velocity{ .dir = RandomDiagonal(), .speed = Speed });
+			EffectStack& effects = entity.Add<EffectStack>();
 			effects.Add<ScalePulse>();
 			effects.Add<ColorCycle>(3.f, Random(0.f, 1.f));	// 시작 색 분산
 			
-			return object;
+			return entity;
 		}
 
 		static Vec2 RandomDiagonal()

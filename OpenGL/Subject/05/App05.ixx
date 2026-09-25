@@ -32,7 +32,7 @@ export namespace app05
 			Restart();
 
 			// 맵 범위가 화면과 다를 때만
-			// _scene.SetBounds({ .min{ -1.f, -1.f }, .max{ 1.f, 1.f } });
+			// _world.SetBounds({ .min{ -1.f, -1.f }, .max{ 1.f, 1.f } });
 		}
 
 	protected:
@@ -53,32 +53,32 @@ export namespace app05
 			{
 				if (_createCount < MaxCreateRect)
 				{
-					Object spawned = Rect::Spawn(_scene, input.MousePos());
+					Entity spawned = Rect::Spawn(_world, input.MousePos());
 					spawned.Add<Spawned>();
 					_contacts.AssumeTouching(spawned.Id(), _eraser);
 					_createCount++;
 				}
 			}
 
-			_scene.Flush(); // 목록 확정. 이번 프레임 생성분도 아래 시스템 대상
+			_world.Flush(); // 목록 확정. 이번 프레임 생성분도 아래 시스템 대상
 
 			Grow(dt);
-			EffectSystem::Tick(_scene, dt);
-			MovementSystem::Tick(_scene, dt);
-			CollisionSystem::Tick(_scene);
-			CollisionSystem::Separate(_scene);
+			EffectSystem::Tick(_world, dt);
+			MovementSystem::Tick(_world, dt);
+			CollisionSystem::Tick(_world);
+			CollisionSystem::Separate(_world);
 			
-			for (const Hit& hit : _contacts.Update(_scene))
+			for (const Hit& hit : _contacts.Update(_world))
 			{
 				if (hit.phase != HitPhase::Enter)
 					continue;
 
-				Object a = _scene.Find(hit.a);
-				Object b = _scene.Find(hit.b);
+				Entity a = _world.Find(hit.a);
+				Entity b = _world.Find(hit.b);
 				if (!a || !b)
 					continue;
 				
-				Object eraser = a.Get<Trigger>() ? a : (b.Get<Trigger>() ? b : Object{});
+				Entity eraser = a.Get<Trigger>() ? a : (b.Get<Trigger>() ? b : Entity{});
 				if (!eraser)
 					continue;
 
@@ -90,21 +90,21 @@ export namespace app05
 		{
 			auto& renderer = GetRenderer();
 			renderer.Clear(Background);
-			RenderSystem::Draw(_scene, renderer);
+			RenderSystem::Draw(_world, renderer);
 		}
 
 	private:
-		// 남은 ObjectId는 Clear의 세대 증가로 전부 무효
+		// 남은 EntityId는 Clear의 세대 증가로 전부 무효
 		void Restart()
 		{
-			_scene.Clear();
+			_world.Clear();
 			_contacts.Clear();
 			_eraser = {};
 			_createCount = 0;
 
 			const int count = Random(20, 40);
 			for (int i = 0; i < count; ++i)
-				Rect::Spawn(_scene, RandomVec2({ -0.9f, -0.9f }, { 0.9f, 0.9f }));
+				Rect::Spawn(_world, RandomVec2({ -0.9f, -0.9f }, { 0.9f, 0.9f }));
 		}
 
 		// 면적 합산 (과제3 합치기와 동일)
@@ -121,13 +121,13 @@ export namespace app05
 		// transform.size를 키움 → 판정 범위도 함께 확대
 		void Grow(float dt)
 		{
-			_scene.Each<Growth, Transform>([dt](Object, Growth& growth, Transform& transform)
+			_world.Each<Growth, Transform>([dt](Entity, Growth& growth, Transform& transform)
 				{
 					transform.size = Approach(transform.size, growth.target, GrowRate, dt);
 				});
 		}
 
-		void Eat(Object eraser, Object target)
+		void Eat(Entity eraser, Entity target)
 		{
 			if (Visual* eaten = target.Get<Visual>())
 				if (Visual* visual = eraser.Get<Visual>())
@@ -139,14 +139,14 @@ export namespace app05
 			if (target.Get<Spawned>() != nullptr)
 				_createCount--;
 			
-			_scene.Destroy(target);
+			_world.Destroy(target);
 		}
 
 		void UpdateEraser(const Input& input)
 		{
 			if (input.IsMousePressed(GLFW_MOUSE_BUTTON_LEFT))
 			{
-				Object eraser = _scene.Spawn({ .pos = input.MousePos(), .size = { EraserSize, EraserSize } });
+				Entity eraser = _world.Spawn({ .pos = input.MousePos(), .size = { EraserSize, EraserSize } });
 				eraser.Add<Visual>(Color{ 0.f, 0.f, 0.f });
 				eraser.Add<Trigger>();
 				eraser.Add<EffectStack>().Add<ScaleIn>(0.f, 0.3f);
@@ -155,7 +155,7 @@ export namespace app05
 				return;						// 목록 반영은 아래 Flush
 			}
 
-			Object eraser = _scene.Find(_eraser);
+			Entity eraser = _world.Find(_eraser);
 			if (!eraser)
 				return;
 
@@ -163,15 +163,15 @@ export namespace app05
 
 			if (input.IsMouseReleased(GLFW_MOUSE_BUTTON_LEFT))
 			{
-				_scene.Destroy(eraser);
+				_world.Destroy(eraser);
 				_eraser = {};
 			}
 		}
 
 
-		Scene						_scene;
+		World						_world;
 		ContactTracker				_contacts;
-		ObjectId					_eraser;	// 안 누르면 빈 값
+		EntityId					_eraser;	// 안 누르면 빈 값
 		std::uint32_t					_createCount = 0;
 
 		static constexpr Color				Background{ 1.f, 1.f, 1.f };

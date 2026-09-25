@@ -3,7 +3,7 @@ export module hs.collision_system;
 import std;
 import hs.transform;
 import hs.movement;
-export import hs.scene;
+export import hs.world;
 
 export namespace hs
 {
@@ -13,8 +13,8 @@ export namespace hs
 	// a: index가 작은 쪽
 	struct Contact
 	{
-		ObjectId a;
-		ObjectId b;
+		EntityId a;
+		EntityId b;
 	};
 
 	// 모든 값 확정 뒤, 프레임 마지막
@@ -22,28 +22,28 @@ export namespace hs
 	{
 	public:
 		// 조회만. 변경 없음
-		static void FindContacts(Scene& scene, std::vector<Contact>& contacts)
+		static void FindContacts(World& world, std::vector<Contact>& contacts)
 		{
-			ForEachPair(scene, [&contacts](Object a, Object b)
+			ForEachPair(world, [&contacts](Entity a, Entity b)
 				{
 					if (a.GetBounds().Intersects(b.GetBounds()))
 						contacts.push_back({ a.Id(), b.Id() });
 				});
 		}
 
-		static void Tick(Scene& scene)
+		static void Tick(World& world)
 		{
-			const Bounds bounds = scene.WorldBounds();
-			scene.Each<Mover, Transform>([bounds](Object, Mover& mover, Transform& transform)
+			const Bounds bounds = world.WorldBounds();
+			world.Each<Mover, Transform>([bounds](Entity, Mover& mover, Transform& transform)
 				{
 					ResolveBounds(transform, mover.velocity, mover.boundsResponse, bounds);
 				});
 		}
 
 		// 한 번에 다 밀면 떨림 → 조금씩
-		static void Separate(Scene& scene)
+		static void Separate(World& world)
 		{
-			ForEachPair(scene, [](Object a, Object b)
+			ForEachPair(world, [](Entity a, Entity b)
 				{
 					if (a.Get<Trigger>() || b.Get<Trigger>())
 						return;
@@ -72,11 +72,11 @@ export namespace hs
 		// 순회 방법은 이 한 곳에만. 칸 순서(Objects)라 a가 항상 index가 작은 쪽
 		// 전부 대 전부. 수백 개 넘으면 여기만 공간 분할로
 		template<class F>
-		static void ForEachPair(Scene& scene, F&& body)
+		static void ForEachPair(World& world, F&& body)
 		{
-			auto objects = scene.Objects();
-			for (auto it = objects.begin(); it != objects.end(); ++it)
-				for (auto other = std::next(it); other != objects.end(); ++other)
+			auto entities = world.Entities();
+			for (auto it = entities.begin(); it != entities.end(); ++it)
+				for (auto other = std::next(it); other != entities.end(); ++other)
 					body(*it, *other);
 		}
 

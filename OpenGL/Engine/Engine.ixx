@@ -13,7 +13,7 @@ export import hs.input;
 export import hs.renderer;
 export import hs.visual;
 export import hs.render_system;
-export import hs.scene;
+export import hs.world;
 export import hs.easing;
 export import hs.movement;
 export import hs.movement_modes;

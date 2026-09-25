@@ -3,7 +3,7 @@ export module hs.render_system;
 import hs.transform;
 export import hs.renderer;
 import hs.visual;
-export import hs.scene;
+export import hs.world;
 
 export namespace hs
 {
@@ -11,12 +11,12 @@ export namespace hs
 	class RenderSystem
 	{
 	public:
-		static void Draw(Scene& scene, IRenderer& renderer)
+		static void Draw(World& world, IRenderer& renderer)
 		{
-			for (Object object : scene.Objects())
-				if (const Visual* visual = object.Get<Visual>())
+			for (Entity entity : world.Entities())
+				if (const Visual* visual = entity.Get<Visual>())
 				{
-					Transform drawn = object.GetTransform();
+					Transform drawn = entity.GetTransform();
 					drawn.size *= visual->scale * visual->effectScale;		// 연출 배율은 그릴 때만
 					renderer.DrawRect(drawn, visual->color);
 				}

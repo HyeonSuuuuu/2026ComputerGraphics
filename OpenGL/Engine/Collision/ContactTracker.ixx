@@ -10,8 +10,8 @@ export namespace hs
 	// Exit 시점엔 한쪽이 이미 소멸했을 수 있음
 	struct Hit
 	{
-		ObjectId a;
-		ObjectId b;
+		EntityId a;
+		EntityId b;
 		HitPhase phase;
 	};
 
@@ -19,10 +19,10 @@ export namespace hs
 	class ContactTracker
 	{
 	public:
-		const std::vector<Hit>& Update(Scene& scene)
+		const std::vector<Hit>& Update(World& world)
 		{
 			_current.clear();
-			CollisionSystem::FindContacts(scene, _current);
+			CollisionSystem::FindContacts(world, _current);
 			std::ranges::sort(_current, Less);
 
 			// 정렬된 두 목록 병합: 이번만 Enter, 양쪽 Stay, 지난번만 Exit
@@ -44,8 +44,8 @@ export namespace hs
 		}
 
 		// 다음 판정에서 Enter 대신 Stay
-		// 겹친 자리에서 생성된 오브젝트의 즉시 처리 방지용
-		void AssumeTouching(ObjectId a, ObjectId b)
+		// 겹친 자리에서 생성된 엔티티의 즉시 처리 방지용
+		void AssumeTouching(EntityId a, EntityId b)
 		{
 			const Contact contact = LessId(a, b) ? Contact{ a, b } : Contact{ b, a };
 
@@ -61,7 +61,7 @@ export namespace hs
 		}
 
 	private:
-		static bool LessId(ObjectId x, ObjectId y)
+		static bool LessId(EntityId x, EntityId y)
 		{
 			return std::tie(x.index, x.generation) < std::tie(y.index, y.generation);
 		}

@@ -4,7 +4,7 @@ import std;
 import hs.check;
 import hs.transform;
 import hs.movement;
-export import hs.scene;
+export import hs.world;
 
 export namespace hs
 {
@@ -13,11 +13,11 @@ export namespace hs
 	class MovementSystem
 	{
 	public:
-		static void Tick(Scene& scene, float dt)
+		static void Tick(World& world, float dt)
 		{
 			Check(dt >= 0.f, "시간은 거꾸로 흐르지 않는다");
 
-			scene.Each<Mover, Transform>([dt](Object, Mover& mover, Transform& transform)
+			world.Each<Mover, Transform>([dt](Entity, Mover& mover, Transform& transform)
 				{
 					if (mover.enabled)
 						Step(mover, transform, dt);

@@ -10,11 +10,11 @@ export namespace app05
     class Rect
     {
     public:
-        static Object Spawn(Scene& scene, Vec2 pos)
+        static Entity Spawn(World& world, Vec2 pos)
         {
-            Object object = scene.Spawn({ .pos = pos, .size = { Size, Size } });
-            object.Add<Visual>(RandomColor());
-            return object;
+            Entity entity = world.Spawn({ .pos = pos, .size = { Size, Size } });
+            entity.Add<Visual>(RandomColor());
+            return entity;
         }
 
         static constexpr float Size = 0.12f;
