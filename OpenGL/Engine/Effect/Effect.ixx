@@ -1,3 +1,6 @@
+module;
+#include "Core/Check.h"
+
 export module hs.effect;
 
 import std;
@@ -15,7 +18,7 @@ export namespace hs
 		explicit Playback(float duration = 1.f, bool loop = true)
 			: _duration(duration), _loop(loop)
 		{
-			Check(duration > 0.f, "길이가 0이면 값이 매 프레임 튄다");
+			HS_DCHECK(duration > 0.f, "길이가 0이면 값이 매 프레임 튄다");
 		}
 
 		float Advance(float dt)
@@ -25,10 +28,9 @@ export namespace hs
 			return _time / _duration;
 		}
 
-		// pre 대신 Check: 이 파일에 pre를 쓰면 GCC 16.2 내부 오류(ICE, gimplify.cc)
 		void Seek(float phase)
 		{
-			Check(phase >= 0.f && phase <= 1.f, "위상은 0~1이다");
+			HS_DCHECK(phase >= 0.f && phase <= 1.f, "위상은 0~1이다");
 			_time = phase * _duration;
 		}
 
@@ -73,7 +75,7 @@ export namespace hs
 		T& Add(Args&&... args)
 		{
 			static_assert(std::derived_from<T, IEffect>, "이펙트는 IEffect를 상속해야 한다");
-			Check(!Get<T>(), "이미 붙어 있다. 값을 바꾸려면 Get을 쓸 것");
+			HS_DCHECK(!Get<T>(), "이미 붙어 있다. 값을 바꾸려면 Get을 쓸 것");
 
 			auto created = std::make_unique<T>(std::forward<Args>(args)...);
 			T& added = *created;

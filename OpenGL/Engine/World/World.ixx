@@ -1,3 +1,6 @@
+module;
+#include "Core/Check.h"
+
 export module hs.world;
 
 import std;
@@ -54,7 +57,7 @@ export namespace hs
 
 		Entity Spawn(const Transform& transform)
 		{
-			Check(transform.size.x > 0.f && transform.size.y > 0.f, "크기가 0인 엔티티는 보이지도 맞지도 않는다");
+			HS_DCHECK(transform.size.x > 0.f && transform.size.y > 0.f, "크기가 0인 엔티티는 보이지도 맞지도 않는다");
 
 			Entity entity{ _entities.Create(), this };
 			entity.Add<Transform>(transform);
@@ -72,21 +75,21 @@ export namespace hs
 		// 순회 중 호출 금지
 		void Flush()
 		{
-			Check(_iterating == 0, "Each 도중 Flush 금지");
+			HS_DCHECK(_iterating == 0, "Each 도중 Flush 금지");
 			_entities.Flush([this](std::uint32_t index) { _components.RemoveAll(index); });
 		}
 
 		void Clear()
 		{
-			Check(_iterating == 0, "Each 도중 Clear 금지");
+			HS_DCHECK(_iterating == 0, "Each 도중 Clear 금지");
 			_components.Clear();
 			_entities.Clear();
 		}
 
 		// 레벨 변경 시에만 갱신
 		void SetBounds(Bounds bounds)
-			pre (bounds.min.x <= bounds.max.x && bounds.min.y <= bounds.max.y)
 		{
+			HS_DCHECK(bounds.min.x <= bounds.max.x && bounds.min.y <= bounds.max.y, "bounds의 min과 max가 뒤집혀 있다");
 			_bounds = bounds;
 		}
 
@@ -163,9 +166,9 @@ export namespace hs
 	template<class T, class... Args>
 	T& Entity::Add(Args&&... args) const
 	{
-		Check(static_cast<bool>(*this), "없는 엔티티에 컴포넌트 추가");
-		Check(_world->_iterating == 0, "Each 도중 Add 금지: 저장소가 재배치되어 순회 중인 참조가 깨진다");
-		Check(!Get<T>(), "이미 붙어 있다. 값을 바꾸려면 Get을 쓸 것");
+		HS_DCHECK(static_cast<bool>(*this), "없는 엔티티에 컴포넌트 추가");
+		HS_DCHECK(_world->_iterating == 0, "Each 도중 Add 금지: 저장소가 재배치되어 순회 중인 참조가 깨진다");
+		HS_DCHECK(!Get<T>(), "이미 붙어 있다. 값을 바꾸려면 Get을 쓸 것");
 
 		return _world->_components.Of<T>().Add(_id.index, std::forward<Args>(args)...);
 	}
@@ -183,7 +186,7 @@ export namespace hs
 	template<class T>
 	bool Entity::Remove() const
 	{
-		Check(!_world || _world->_iterating == 0, "Each 도중 Remove 금지");
+		HS_DCHECK(!_world || _world->_iterating == 0, "Each 도중 Remove 금지");
 		if (!Get<T>())
 			return false;
 

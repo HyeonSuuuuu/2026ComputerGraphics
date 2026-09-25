@@ -15,7 +15,7 @@ cmake --build cmake-build-debug
 실행 파일은 `cmake-build-debug/OpenGL.exe` (glfw·glew DLL이 옆에 복사됨). 빌드 전에 실행 중인 프로세스를 먼저 종료할 것.
 테스트는 `cmake-build-debug/EngineTests.exe` (종료 코드 = 실패 수). **엔진(특히 World) 속을 고치면 반드시 돌릴 것.**
 라이브러리는 MSYS2 패키지: `mingw-w64-ucrt-x86_64-{gcc,cmake,ninja,glfw,glew,glm}`.
-C++26 + `-freflection` + `-fno-rtti`(`typeid`·`dynamic_cast` 불가) + `-fcontracts`(Debug는 위반 시 중단, 그 외 무시). `import std;`는 CMake 실험 기능이라 CMake를 올리면 `CMakeLists.txt`의 UUID도 바꿔야 한다.
+C++26 + `-freflection` + `-fno-rtti`(`typeid`·`dynamic_cast` 불가). `import std;`는 CMake 실험 기능이라 CMake를 올리면 `CMakeLists.txt`의 UUID도 바꿔야 한다.
 MSVC 프로젝트(`.slnx`·`.vcxproj`)는 제거됨 — 필요하면 git 기록에서 복구.
 
 ## 구조
@@ -26,7 +26,7 @@ main.cpp          실행할 과제 앱 선택
 Subject/NN        과제별 앱과 게임 쪽 컴포넌트 (네임스페이스 appNN)
 Template          새 과제 시작용 뼈대
 Tests             EngineTests: World(ECS) 동작 고정. 컴포넌트를 다른 모듈에서 Add하는 경우 포함
-Engine/Core       Check(단언·컨트랙트 처리), Random, TypeId(이름 해시·타입 순번), SparseSet,
+Engine/Core       Check(HS_DCHECK 매크로 Check.h + 실패 처리), Random, TypeId(이름 해시·타입 순번), SparseSet,
                   Enums(EnumToString·StringToEnum·EnumCount), Text(Format)
 Engine/Math       Vec2(glm 래핑·Approach), Bounds(AABB), Easing
 Engine/World      World(한 판 전체: 조립·조회·Each), Entity(번호표 손잡이), EntityTable(생존·세대·Flush),
@@ -78,7 +78,9 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
 - **`std::format`·`std::println` 대신 `hs::Format`.** 여러 모듈에서 직접 쓰면 GCC 16이 format 내부 정적 데이터를
   모듈마다 만들어 링크 충돌(`multiple definition of ...__write_escaped_unicode_part`). 출력은 `std::cout << Format(...)`.
 - **`auto` 반환 멤버 함수는 클래스 안에서 쓰는 곳보다 먼저 정의.** GCC는 본문을 순서대로 추론한다.
-- **`pre`에서 GCC 내부 오류(ICE, gimplify.cc)가 나면 그 자리는 `Check`로.** `Effect.ixx`의 `Playback::Seek`가 그 경우(GCC 16.2).
+- **C++26 컨트랙트(`pre`·`contract_assert`)는 쓰지 않는다 (GCC 16.2).** 모듈과 섞이면 위반 순간 GCC가 만든
+  `__tu_has_violation`이 엉뚱한 함수로 뛰어 SIGSEGV. 그 밖에도 리플렉션과 같은 파일이면 ICE, `import std;` 없는 모듈에서
+  템플릿 속 컨트랙트가 펼쳐지면 `contract_violation` 선언 충돌. 작은 단독 실험은 통과하니 속지 말 것 → 엔진 라이브러리로 위반까지 재현해 보고 판단.
 - **import를 바꾼 뒤 `dependency cycle`이 나면** 소스가 아니라 ninja의 옛 기록일 수 있음 → `cmake-build-debug/.ninja_deps` 삭제 후 빌드.
 - 파일은 사용자가 동시에 편집하는 경우가 있다. **수정 전에 현재 내용을 확인할 것.**
 
@@ -86,7 +88,7 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
 
 - 탭 들여쓰기, 한글 주석, 멤버는 `_소문자`.
 - **코드가 말하는 것은 주석으로 쓰지 않는다.** 남길 것은 코드에 안 보이는 것뿐 — 왜 이 값인지, 불변식, 수명 주의, 겪었던 버그의 이유. 한 줄이면 충분하다.
-- 단언은 `Check(조건, "무엇이 왜 틀렸는지")`. 계산이 비싼 검사는 `CheckSlow(람다, ...)`.
-- **함수 인자의 전제 조건이고 조건식만으로 이유가 보이면 `pre (조건)`** (C++26 컨트랙트). 위반 시 조건식이 그대로 출력된다(`Approach`, `SetBounds`, `FollowMode`).
-  이유 설명이 필요하면 `Check`(메시지 인자가 있음). `pre`의 줄 번호는 부른 쪽이 아니라 `pre`를 적은 쪽.
+- 단언은 `HS_DCHECK(조건, "무엇이 왜 틀렸는지")`. Debug 전용이라 Release에선 조건식째 사라짐 → 비싼 검사도 그대로 써도 됨.
+  쓰는 모듈은 맨 위에 `module;` + `#include "Core/Check.h"`(매크로는 모듈로 못 내보냄), 그리고 `import hs.check;`.
+  **조건식에 부작용 금지**: Release에서 식이 통째로 사라진다.
 - 모듈 하나당 개념 하나. 인터페이스에 등장하는 타입은 `export import`로 함께 내보낸다.

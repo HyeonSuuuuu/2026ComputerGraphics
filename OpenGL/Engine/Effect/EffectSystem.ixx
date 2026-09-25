@@ -1,3 +1,6 @@
+module;
+#include "Core/Check.h"
+
 export module hs.effect_system;
 
 import std;
@@ -12,7 +15,7 @@ export namespace hs
 	public:
 		static void Tick(World& world, float dt)
 		{
-			Check(dt >= 0.f, "시간은 거꾸로 흐르지 않는다");
+			HS_DCHECK(dt >= 0.f, "시간은 거꾸로 흐르지 않는다");
 
 			world.Each<EffectStack, Visual>([dt](Entity, EffectStack& stack, Visual& visual)
 				{

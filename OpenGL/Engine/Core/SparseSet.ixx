@@ -1,3 +1,6 @@
+module;
+#include "Core/Check.h"
+
 export module hs.sparse_set;
 
 import std;
@@ -19,7 +22,7 @@ export namespace hs
 		template<class... Args>
 		T& Add(std::uint32_t key, Args&&... args)
 		{
-			Check(!Contains(key), "같은 키로 두 번 추가");
+			HS_DCHECK(!Contains(key), "같은 키로 두 번 추가");
 
 			if (key >= _sparse.size())
 				_sparse.resize(key + 1);
@@ -30,13 +33,13 @@ export namespace hs
 
 		T& Get(std::uint32_t key)
 		{
-			Check(Contains(key), "없는 키");
+			HS_DCHECK(Contains(key), "없는 키");
 			return _data[_sparse[key]];
 		}
 
 		void Remove(std::uint32_t key)
 		{
-			Check(Contains(key), "없는 키");
+			HS_DCHECK(Contains(key), "없는 키");
 
 			std::uint32_t hole = _sparse[key];
 			std::uint32_t last = static_cast<std::uint32_t>(_dense.size() - 1);

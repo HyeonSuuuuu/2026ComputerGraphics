@@ -1,3 +1,6 @@
+module;
+#include "Core/Check.h"
+
 export module hs.movement_modes;
 
 import std;
@@ -15,7 +18,7 @@ export namespace hs
 	public:
 		explicit ZigZagMode(float interval) : _interval(interval)
 		{
-			Check(interval > 0.f, "간격이 0 이하면 방향이 매 프레임 뒤집힌다");
+			HS_DCHECK(interval > 0.f, "간격이 0 이하면 방향이 매 프레임 뒤집힌다");
 		}
 
 		void CalcVelocity(Velocity& velocity, const Transform&, float dt) override
@@ -43,8 +46,8 @@ export namespace hs
 		EdgePatrolMode(Bounds area, float speed)
 			: _area(area), _speed(speed)
 		{
-			Check(speed > 0.f, "속도가 0이면 제자리에 선다");
-			Check(Perimeter(area) > 0.f, "영역이 한 점이면 돌 곳이 없다");
+			HS_DCHECK(speed > 0.f, "속도가 0이면 제자리에 선다");
+			HS_DCHECK(Perimeter(area) > 0.f, "영역이 한 점이면 돌 곳이 없다");
 		}
 
 		static float Perimeter(const Bounds& area)
@@ -129,10 +132,10 @@ export namespace hs
 	{
 	public:
 		explicit FollowMode(TargetFn target, float arriveRadius = 0.01f)
-			pre (arriveRadius >= 0.f)
 			: _target(std::move(target)), _arriveRadius(arriveRadius)
 		{
-			Check(_target != nullptr, "목표를 읽을 방법이 없다");
+			HS_DCHECK(_target != nullptr, "목표를 읽을 방법이 없다");
+			HS_DCHECK(arriveRadius >= 0.f, "도착 반경이 음수면 영영 도착하지 않는다");
 		}
 
 		explicit FollowMode(Vec2 target, float arriveRadius = 0.01f)

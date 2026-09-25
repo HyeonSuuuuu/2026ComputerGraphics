@@ -1,3 +1,6 @@
+module;
+#include "Core/Check.h"
+
 export module hs.movement_system;
 
 import std;
@@ -15,7 +18,7 @@ export namespace hs
 	public:
 		static void Tick(World& world, float dt)
 		{
-			Check(dt >= 0.f, "시간은 거꾸로 흐르지 않는다");
+			HS_DCHECK(dt >= 0.f, "시간은 거꾸로 흐르지 않는다");
 
 			world.Each<Mover, Transform>([dt](Entity, Mover& mover, Transform& transform)
 				{
@@ -33,7 +36,7 @@ export namespace hs
 			Vec2 velocity = mover.velocity.Value();
 
 			// NaN은 한 번 들어오면 전파 → 사각형 소실. 여기서 차단
-			Check(std::isfinite(velocity.x) && std::isfinite(velocity.y), "속도가 NaN이나 무한이다");
+			HS_DCHECK(std::isfinite(velocity.x) && std::isfinite(velocity.y), "속도가 NaN이나 무한이다");
 
 			transform.pos += velocity * dt;
 		}
