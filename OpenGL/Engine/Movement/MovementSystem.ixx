@@ -17,12 +17,11 @@ export namespace hs
 		{
 			Check(dt >= 0.f, "시간은 거꾸로 흐르지 않는다");
 
-			for (Object& object : scene.Objects())
-			{
-				Mover* mover = object.Get<Mover>();
-				if (mover && mover->enabled)
-					Step(*mover, object.transform, dt);
-			}
+			scene.Each<Mover, Transform>([dt](Object, Mover& mover, Transform& transform)
+				{
+					if (mover.enabled)
+						Step(mover, transform, dt);
+				});
 		}
 
 	private:

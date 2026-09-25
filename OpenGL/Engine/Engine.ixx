@@ -3,7 +3,7 @@ export module hs;
 export import hs.app;
 export import hs.check;
 export import hs.type_id;
-export import hs.component;
+export import hs.sparse_set;
 export import hs.vec2;
 export import hs.bounds;
 export import hs.transform;

@@ -7,16 +7,16 @@ export import hs.scene;
 
 export namespace hs
 {
-	// 그리는 순서 = 생성 순서
+	// 그리는 순서 = 칸 순서(Objects). Each는 삭제 후 순서가 섞여서 안 씀
 	class RenderSystem
 	{
 	public:
-		static void Draw(const Scene& scene, IRenderer& renderer)
+		static void Draw(Scene& scene, IRenderer& renderer)
 		{
-			for (const Object& object : scene.Objects())
+			for (Object object : scene.Objects())
 				if (const Visual* visual = object.Get<Visual>())
 				{
-					Transform drawn = object.transform;
+					Transform drawn = object.GetTransform();
 					drawn.size *= visual->scale * visual->effectScale;		// 연출 배율은 그릴 때만
 					renderer.DrawRect(drawn, visual->color);
 				}

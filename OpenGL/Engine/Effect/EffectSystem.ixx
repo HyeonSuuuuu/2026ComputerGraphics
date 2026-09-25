@@ -14,26 +14,24 @@ export namespace hs
 		{
 			Check(dt >= 0.f, "시간은 거꾸로 흐르지 않는다");
 
-			for (Object& object : scene.Objects())
-			{
-				EffectStack* stack = object.Get<EffectStack>();
-				Visual* visual = object.Get<Visual>();
-				if (!stack || !stack->enabled || !visual)
-					continue;
+			scene.Each<EffectStack, Visual>([dt](Object, EffectStack& stack, Visual& visual)
+				{
+					if (!stack.enabled)
+						return;
 
-				for (auto& [type, effect] : stack->effects)
-					if (effect->IsEnabled())
-						effect->Update(*visual, dt);
+					for (auto& [type, effect] : stack.effects)
+						if (effect->IsEnabled())
+							effect->Update(visual, dt);
 
-				std::erase_if(stack->effects, [visual](const auto& entry)
-					{
-						if (!entry.second->IsFinished())
-							return false;
+					std::erase_if(stack.effects, [&visual](const auto& entry)
+						{
+							if (!entry.second->IsFinished())
+								return false;
 
-						entry.second->SetEnabled(*visual, false);	// 제거 전 복원
-						return true;
-					});
-			}
+							entry.second->SetEnabled(visual, false);	// 제거 전 복원
+							return true;
+						});
+				});
 		}
 	};
 }

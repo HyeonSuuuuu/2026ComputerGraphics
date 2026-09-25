@@ -32,7 +32,7 @@ export namespace app04
 			{
 				if (_scene.Size() < MaxSpawnRect)
 				{
-					Object& object = Rect::Spawn(_scene, input.MousePos());
+					Object object = Rect::Spawn(_scene, input.MousePos());
 					Mover* mover = object.Get<Mover>();
 					ApplyMotion(object);
 					SetEffect<ScalePulse>(object, _pulsing);
@@ -68,14 +68,14 @@ export namespace app04
 			if (input.IsKeyPressed(GLFW_KEY_4))
 			{
 				_pulsing = !_pulsing;
-				for (Object& object : _scene.Objects())
+				for (Object object : _scene.Objects())
 					SetEffect<ScalePulse>(object, _pulsing);
 			}
 			
 			if (input.IsKeyPressed(GLFW_KEY_5))
 			{
 				_coloring = !_coloring;
-				for (Object& object : _scene.Objects())
+				for (Object object : _scene.Objects())
 					SetEffect<ColorCycle>(object, _coloring);
 			}
 			
@@ -86,7 +86,7 @@ export namespace app04
 				_coloring = false;
 
 				ApplyEnabled();
-				for (Object& object : _scene.Objects())
+				for (Object object : _scene.Objects())
 				{
 					SetEffect<ScalePulse>(object, false);
 					SetEffect<ColorCycle>(object, false);
@@ -118,7 +118,7 @@ export namespace app04
 	private:
 		enum class Motion { Diagonal, ZigZag, EdgePatrol, Home };
 		
-		void ApplyMotion(Object& object)
+		void ApplyMotion(Object object)
 		{
 			Mover* mover = object.Get<Mover>();
 			if (!mover)
@@ -160,7 +160,7 @@ export namespace app04
 
 		void ApplyMotion()
 		{
-			for (Object& object : _scene.Objects())
+			for (Object object : _scene.Objects())
 				ApplyMotion(object);
 		}
 		
@@ -174,7 +174,7 @@ export namespace app04
 		}
 
 		template<class T>
-		void SetEffect(Object& object, bool on)
+		void SetEffect(Object object, bool on)
 		{
 			EffectStack* stack = object.Get<EffectStack>();
 			Visual* visual = object.Get<Visual>();
@@ -188,7 +188,7 @@ export namespace app04
 		// 방향·모드 유지, 정지만
 		void ApplyEnabled()
 		{
-			for (Object& object : _scene.Objects())
+			for (Object object : _scene.Objects())
 				if (Mover* mover = object.Get<Mover>())
 					mover->enabled = _moving;
 		}

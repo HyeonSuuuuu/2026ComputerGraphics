@@ -24,9 +24,9 @@ CMakeLists.txt    빌드 설정 (Engine·Subject·Template의 .ixx를 전부 모
 main.cpp          실행할 과제 앱 선택
 Subject/NN        과제별 앱과 게임 쪽 컴포넌트 (네임스페이스 appNN)
 Template          새 과제 시작용 뼈대
-Engine/Core       Check(단언), Component(IComponent), Random, TypeId(리플렉션 이름 해시)
+Engine/Core       Check(단언), Random, TypeId(이름 해시·타입 순번), SparseSet
 Engine/Math       Vec2(glm 래핑·Approach), Bounds(AABB), Easing
-Engine/Scene      Transform(pos·size), Object(컴포넌트 컨테이너), Scene(소유·조회)
+Engine/Scene      Transform(pos·size), Scene(ECS: 타입별 SparseSet 저장소, Object 손잡이, Each)
 Engine/Movement   Mover, IMovementMode(ZigZag·Follow·EdgePatrol), MovementSystem
 Engine/Effect     IEffect·EffectStack·Playback, Effects(ScalePulse·ColorCycle·ScaleIn), EffectSystem
 Engine/Collision  CollisionSystem(경계·Separate·FindContacts, Trigger), ContactTracker(Enter/Stay/Exit)
@@ -41,13 +41,15 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
 ## 설계 규칙
 
 - **데이터와 실행을 나눈다.** 컴포넌트는 데이터, 시스템이 돌린다. `Object`에 로직을 넣지 않는다.
+- **ECS.** 컴포넌트는 `Scene`의 타입별 `SparseSet`에 값으로 보관. `Object`는 번호 + `Scene*`인 손잡이라 값으로 넘긴다.
+  시스템은 `scene.Each<Mover, Transform>(람다)`로 필요한 저장소만 돈다. 그리기·충돌 쌍처럼 순서가 중요하면 `Objects()`(칸 순서).
 - **Movement는 위치와 속도**를 다룬다(충돌이 이 값들을 바꾼다).
 - **Effect는 `Visual`만 바꾼다.** 기준은 "꺼도 게임 결과가 같은가". `IEffect`가 `Visual&`만 받아 타입으로 강제된다.
   게임 결과가 달라지는 변화(먹으면 커짐 등)는 게임 로직이나 시스템이 한다(`App05::Grow` + `Approach`).
   `Animation`이라는 이름은 나중의 스프라이트·키프레임 애니메이션용으로 비워 둔다.
 - **종류는 상속이 아니라 구성으로.** `Object`를 상속하지 않는다. 종류가 다르면 붙이는 컴포넌트가 다른 것이고, 조립은 게임 쪽 함수가 한다(`Rect::Spawn`).
-- **상속은 "끼우는 자리"에만** — `App` 계층, `IMovementMode`, `IEffect`, `IRenderer`, `IComponent`.
-- **컴포넌트는 게임 쪽에서 정의한다.** `struct Health : IComponent` 하면 끝이고 엔진은 안 바뀐다(예: `Subject/04/Rect.ixx`의 `Home`).
+- **상속은 "끼우는 자리"에만** — `App` 계층, `IMovementMode`, `IEffect`, `IRenderer`.
+- **컴포넌트는 게임 쪽에서 정의한다.** 평범한 `struct Health { ... };`면 끝이고 엔진은 안 바뀐다(예: `Subject/04/Rect.ixx`의 `Home`). 상속 불필요, 이동 가능하기만 하면 됨.
 - **게임 코드는 `hs` 밖에.** 과제마다 `appNN` 네임스페이스, 파일 위에 `using namespace hs;`.
 - **의존 방향은 Core·Math → Scene·Render → 시스템 → 게임.** 아래층이 위층을 import하지 않는다.
 - **태그로 분기하지 않는다.** 처리가 다르면 다형성으로. 태그는 "적인가?" 묻는 용도로만.
@@ -58,13 +60,16 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
 ## 주의할 것
 
 - **순회 중 Spawn/Destroy는 예약된다.** 다음 `Scene::Flush()`에서 반영된다. 직접 벡터를 건드리지 말 것.
+- **`Get`으로 받은 포인터·참조는 그 자리에서만.** 같은 타입의 Add·삭제가 저장소를 재배치(삭제는 끝 원소로 구멍을 메움). 프레임을 넘기면 `ObjectId`.
+- **`Each` 안에서 Add·Remove·Spawn 금지.** `Check`로 막혀 있다. 모아 뒀다가 순회 뒤에.
 - **`Get<T>()`는 정확히 같은 타입만 찾는다.** 컴포넌트를 상속하면 조용히 못 찾는다.
 - **`TypeIdOf<T>`는 이름(`hs::Visual`)의 해시.** 과제마다 같은 이름으로 컴포넌트를 만들면 ID가 겹친다 → 과제별 네임스페이스로.
   이름은 리플렉션으로 타입을 분해해 조립(`Tween<const app04::Home*>`까지). 통째로 `display_string_of`를 쓰면 안 됨:
   GCC가 import한 쪽에서만 `@모듈`을 붙여, 정의한 모듈과 쓰는 모듈의 ID가 달라진다(`Get`이 조용히 nullptr).
   배열·함수 타입·volatile·enum 값 인자·익명 네임스페이스 타입은 컴파일 에러 → 필요해지면 `Name()`에 규칙 추가.
 - `switch`에서 일부러 흘릴 때는 `[[fallthrough]];`.
-- **모듈 간 전방 선언 불가.** `friend class X;`는 X를 선언한 모듈 소속으로 만든다 → 같은 모듈(파티션)이어야 함. `Object`가 `hs.scene:object`인 이유.
+- **모듈 간 전방 선언 불가.** `friend class X;`는 X를 선언한 모듈 소속으로 만든다 → 같은 모듈이어야 함. `Object`와 `Scene`이 한 파일인 이유이기도 함.
+- **모듈 인터페이스의 `inline` 함수 안 `static` 금지.** GCC가 import한 파일마다 따로 만들어 링크 충돌(`NextTypeIndex` 주석). `inline` 없이 정의하면 한 곳에만 생긴다.
 - **glm은 `hs.vec2`에서만 include.** 다른 모듈에서 include하면 `GLM_FORCE_CTOR_INIT`가 빠져 `Vec2` 정의가 둘이 됨(ODR). 필요한 glm 함수는 `hs.vec2`에 감싸서 추가.
 - **`auto` 반환 멤버 함수는 클래스 안에서 쓰는 곳보다 먼저 정의.** GCC는 본문을 순서대로 추론한다.
 - **import를 바꾼 뒤 `dependency cycle`이 나면** 소스가 아니라 ninja의 옛 기록일 수 있음 → `cmake-build-debug/.ninja_deps` 삭제 후 빌드.

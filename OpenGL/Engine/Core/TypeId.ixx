@@ -60,6 +60,13 @@ namespace hs
 
         return Path(r) + std::string{ identifier_of(r) };
     }
+
+    // inline 금지: GCC 모듈에서 static이 import한 파일마다 따로 생겨 링크 충돌 (카운터가 여러 개 되는 것과 같음)
+    std::uint32_t NextTypeIndex()
+    {
+        static std::uint32_t next = 0;
+        return next++;
+    }
 }
 
 export namespace hs
@@ -72,4 +79,12 @@ export namespace hs
 
     template<class T>
     constexpr TypeId TypeIdOf = Fnv1a(TypeName<T>);
+
+    // 처음 쓰일 때 0, 1, 2… 발급 → 타입별 배열의 칸 번호. 실행마다 달라질 수 있어 저장용 아님
+    template<class T>
+    std::uint32_t TypeIndexOf()
+    {
+        static const std::uint32_t index = NextTypeIndex();
+        return index;
+    }
 }

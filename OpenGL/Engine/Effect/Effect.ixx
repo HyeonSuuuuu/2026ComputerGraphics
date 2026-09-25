@@ -2,7 +2,6 @@ export module hs.effect;
 
 import std;
 import hs.check;
-export import hs.component;
 export import hs.visual;
 export import hs.type_id;
 
@@ -67,7 +66,7 @@ export namespace hs
 	};
 
 	// 서로 다른 값 담당 → 동시 실행 가능
-	struct EffectStack : IComponent
+	struct EffectStack
 	{
 		template<class T, class... Args>
 		T& Add(Args&&... args)

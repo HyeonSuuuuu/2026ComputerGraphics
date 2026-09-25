@@ -8,7 +8,7 @@ using namespace hs;
 export namespace app04
 {
 	// 복귀 지점 = 처음 생성 위치
-	struct Home : IComponent
+	struct Home
 	{
 		explicit Home(Vec2 pos) : pos(pos) {}
 
@@ -18,9 +18,9 @@ export namespace app04
 	class Rect
 	{
 	public:
-		static Object& Spawn(Scene& scene, Vec2 pos)
+		static Object Spawn(Scene& scene, Vec2 pos)
 		{
-			Object& object = scene.Spawn({ .pos = pos, .size = { Size, Size } });
+			Object object = scene.Spawn({ .pos = pos, .size = { Size, Size } });
 			object.Add<Home>(pos);
 			object.Add<Visual>(RandomColor());
 			object.Add<Mover>(Velocity{ .dir = RandomDiagonal(), .speed = Speed });

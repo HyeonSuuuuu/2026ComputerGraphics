@@ -11,10 +11,10 @@ using namespace hs;
 
 export namespace app05
 {
-	struct Spawned : IComponent { };
+	struct Spawned { };
 
 	// 먹을수록 커지는 목표 크기. 실제 크기는 Grow가 따라감
-	struct Growth : IComponent
+	struct Growth
 	{
 		explicit Growth(Vec2 target) : target(target) {}
 
@@ -53,7 +53,7 @@ export namespace app05
 			{
 				if (_createCount < MaxCreateRect)
 				{
-					Object& spawned = Rect::Spawn(_scene, input.MousePos());
+					Object spawned = Rect::Spawn(_scene, input.MousePos());
 					spawned.Add<Spawned>();
 					_contacts.AssumeTouching(spawned.Id(), _eraser);
 					_createCount++;
@@ -73,16 +73,16 @@ export namespace app05
 				if (hit.phase != HitPhase::Enter)
 					continue;
 
-				Object* a = _scene.Find(hit.a);
-				Object* b = _scene.Find(hit.b);
+				Object a = _scene.Find(hit.a);
+				Object b = _scene.Find(hit.b);
 				if (!a || !b)
 					continue;
 				
-				Object* eraser = a->Get<Trigger>() ? a : (b->Get<Trigger>() ? b : nullptr);
+				Object eraser = a.Get<Trigger>() ? a : (b.Get<Trigger>() ? b : Object{});
 				if (!eraser)
 					continue;
 
-				Eat(*eraser, eraser == a ? *b : *a);
+				Eat(eraser, eraser == a ? b : a);
 			}
 		}
 
@@ -121,19 +121,20 @@ export namespace app05
 		// transform.size를 키움 → 판정 범위도 함께 확대
 		void Grow(float dt)
 		{
-			for (Object& object : _scene.Objects())
-				if (Growth* growth = object.Get<Growth>())
-					object.transform.size = Approach(object.transform.size, growth->target, GrowRate, dt);
+			_scene.Each<Growth, Transform>([dt](Object, Growth& growth, Transform& transform)
+				{
+					transform.size = Approach(transform.size, growth.target, GrowRate, dt);
+				});
 		}
 
-		void Eat(Object& eraser, Object& target)
+		void Eat(Object eraser, Object target)
 		{
 			if (Visual* eaten = target.Get<Visual>())
 				if (Visual* visual = eraser.Get<Visual>())
 					visual->color = eaten->color;
 
 			if (Growth* growth = eraser.Get<Growth>())
-				growth->target = Merged(growth->target, target.transform.size);
+				growth->target = Merged(growth->target, target.GetTransform().size);
 			
 			if (target.Get<Spawned>() != nullptr)
 				_createCount--;
@@ -145,7 +146,7 @@ export namespace app05
 		{
 			if (input.IsMousePressed(GLFW_MOUSE_BUTTON_LEFT))
 			{
-				Object& eraser = _scene.Spawn({ .pos = input.MousePos(), .size = { EraserSize, EraserSize } });
+				Object eraser = _scene.Spawn({ .pos = input.MousePos(), .size = { EraserSize, EraserSize } });
 				eraser.Add<Visual>(Color{ 0.f, 0.f, 0.f });
 				eraser.Add<Trigger>();
 				eraser.Add<EffectStack>().Add<ScaleIn>(0.f, 0.3f);
@@ -154,15 +155,15 @@ export namespace app05
 				return;						// 목록 반영은 아래 Flush
 			}
 
-			Object* eraser = _scene.Find(_eraser);
+			Object eraser = _scene.Find(_eraser);
 			if (!eraser)
 				return;
 
-			eraser->transform.pos = input.MousePos();
+			eraser.GetTransform().pos = input.MousePos();
 
 			if (input.IsMouseReleased(GLFW_MOUSE_BUTTON_LEFT))
 			{
-				_scene.Destroy(*eraser);
+				_scene.Destroy(eraser);
 				_eraser = {};
 			}
 		}

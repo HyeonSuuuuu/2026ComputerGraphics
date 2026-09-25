@@ -3,13 +3,12 @@ export module hs.collision_system;
 import std;
 import hs.transform;
 import hs.movement;
-export import hs.component;
 export import hs.scene;
 
 export namespace hs
 {
 	// 밀어내기 없이 통지만
-	struct Trigger : IComponent { };
+	struct Trigger { };
 
 	// a: index가 작은 쪽
 	struct Contact
@@ -25,7 +24,7 @@ export namespace hs
 		// 조회만. 변경 없음
 		static void FindContacts(Scene& scene, std::vector<Contact>& contacts)
 		{
-			ForEachPair(scene, [&contacts](Object& a, Object& b)
+			ForEachPair(scene, [&contacts](Object a, Object b)
 				{
 					if (a.GetBounds().Intersects(b.GetBounds()))
 						contacts.push_back({ a.Id(), b.Id() });
@@ -35,26 +34,24 @@ export namespace hs
 		static void Tick(Scene& scene)
 		{
 			const Bounds bounds = scene.WorldBounds();
-			for (Object& object : scene.Objects())
-			{
-				Mover* mover = object.Get<Mover>();
-				if (!mover)
-					continue;
-
-				ResolveBounds(object.transform, mover->velocity, mover->boundsResponse, bounds);
-			}
+			scene.Each<Mover, Transform>([bounds](Object, Mover& mover, Transform& transform)
+				{
+					ResolveBounds(transform, mover.velocity, mover.boundsResponse, bounds);
+				});
 		}
 
 		// 한 번에 다 밀면 떨림 → 조금씩
 		static void Separate(Scene& scene)
 		{
-			ForEachPair(scene, [](Object& a, Object& b)
+			ForEachPair(scene, [](Object a, Object b)
 				{
 					if (a.Get<Trigger>() || b.Get<Trigger>())
 						return;
 
-					Vec2 delta = b.transform.pos - a.transform.pos;
-					Vec2 overlap = (a.transform.size + b.transform.size) / 2.f + Vec2(SeparateGap) - Abs(delta);
+					Transform& ta = a.GetTransform();
+					Transform& tb = b.GetTransform();
+					Vec2 delta = tb.pos - ta.pos;
+					Vec2 overlap = (ta.size + tb.size) / 2.f + Vec2(SeparateGap) - Abs(delta);
 					if (overlap.x <= 0.f || overlap.y <= 0.f)
 						return;
 
@@ -66,13 +63,13 @@ export namespace hs
 						push.y = delta.y < 0.f ? -overlap.y : overlap.y;
 
 					push *= SeparateStrength * 0.5f;	// 절반씩
-					a.transform.pos -= push;
-					b.transform.pos += push;
+					ta.pos -= push;
+					tb.pos += push;
 				});
 		}
 
 	private:
-		// 순회 방법은 이 한 곳에만
+		// 순회 방법은 이 한 곳에만. 칸 순서(Objects)라 a가 항상 index가 작은 쪽
 		// 전부 대 전부. 수백 개 넘으면 여기만 공간 분할로
 		template<class F>
 		static void ForEachPair(Scene& scene, F&& body)

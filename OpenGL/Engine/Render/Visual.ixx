@@ -1,11 +1,10 @@
 export module hs.visual;
 
 export import hs.color;
-export import hs.component;
 
 export namespace hs
 {
-	struct Visual : IComponent
+	struct Visual
 	{
 		explicit Visual(Color color = {}) : color(color) {}
 

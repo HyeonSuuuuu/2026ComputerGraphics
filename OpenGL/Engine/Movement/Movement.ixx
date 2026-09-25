@@ -2,7 +2,6 @@ export module hs.movement;
 
 import std;
 export import hs.transform;
-export import hs.component;
 
 // 위치·속도. 충돌이 바꾸는 값
 export namespace hs
@@ -37,7 +36,7 @@ export namespace hs
 		virtual void CalcVelocity(Velocity& velocity, const Transform& transform, float dt) = 0;
 	};
 
-	struct Mover : IComponent
+	struct Mover
 	{
 		Mover() = default;
 		explicit Mover(Velocity velocity, BoundsResponse response = BoundsResponse::Reflect)
