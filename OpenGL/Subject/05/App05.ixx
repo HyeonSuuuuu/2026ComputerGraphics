@@ -27,7 +27,7 @@ export namespace app05
 		using Super = App;
 	public:
 		App05(int width, int height)
-			: Super(width, height, "App05")
+			: Super(width, height)
 		{
 			Restart();
 

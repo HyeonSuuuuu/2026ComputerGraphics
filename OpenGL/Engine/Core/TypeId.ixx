@@ -80,6 +80,10 @@ export namespace hs
     template<class T>
     constexpr TypeId TypeIdOf = Fnv1a(TypeName<T>);
 
+    // 네임스페이스 없는 이름 ("App04"). 화면 표시용 — 겹칠 수 있으니 ID로 쓰지 말 것
+    template<class T>
+    constexpr std::string_view ShortTypeName = std::define_static_string(identifier_of(^^T));
+
     // 처음 쓰일 때 0, 1, 2… 발급 → 타입별 배열의 칸 번호. 실행마다 달라질 수 있어 저장용 아님
     template<class T>
     std::uint32_t TypeIndexOf()

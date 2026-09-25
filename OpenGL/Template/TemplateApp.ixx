@@ -15,7 +15,7 @@ export namespace app_name
 		using Super = App;
 	public:
 		App_name(int width, int height)
-			: Super(width, height, "app_name")
+			: Super(width, height)
 		{
 			// 맵 범위가 화면과 다를 때만
 			// _world.SetBounds({ .min{ -1.f, -1.f }, .max{ 1.f, 1.f } });
