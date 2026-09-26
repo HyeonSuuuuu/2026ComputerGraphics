@@ -12,6 +12,11 @@ export namespace hs
 		return { Random(0.f, 1.f), Random(0.f, 1.f), Random(0.f, 1.f) };
 	}
 
+	Color Lerp(Color from, Color to, float t)
+	{
+		return { std::lerp(from.r, to.r, t), std::lerp(from.g, to.g, t), std::lerp(from.b, to.b, t) };
+	}
+
 	// hue 0~1이 한 바퀴 (0 빨강, 0.33 초록, 0.66 파랑)
 	Color FromHsv(float hue, float saturation = 1.f, float value = 1.f)
 	{

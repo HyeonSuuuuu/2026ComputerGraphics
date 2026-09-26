@@ -5,12 +5,13 @@ import std;
 
 import app04;
 import app05;
+import app06;
 
 int main()
 {
 	try
 	{
-		app04::App04 app(800, 600);
+		app06::App06 app(800, 600);
 		app.Run();
 	}
 	catch (const std::exception& e)

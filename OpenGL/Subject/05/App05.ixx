@@ -107,8 +107,7 @@ export namespace app05
 				Rect::Spawn(_world, RandomVec2({ -0.9f, -0.9f }, { 0.9f, 0.9f }));
 		}
 
-		// 면적 합산 (과제3 합치기와 동일)
-		// 커질수록 한 개의 비중 감소 → 성장 자연 감속
+		// 면적 합산
 		static Vec2 Merged(Vec2 size, Vec2 eaten)
 		{
 			const float area = size.x * size.y + eaten.x * eaten.y;
@@ -169,12 +168,12 @@ export namespace app05
 		}
 
 
-		World						_world;
-		ContactTracker				_contacts;
-		EntityId					_eraser;	// 안 누르면 빈 값
+		World							_world;
+		ContactTracker					_contacts;
+		EntityId						_eraser;	// 안 누르면 빈 값
 		std::uint32_t					_createCount = 0;
 
-		static constexpr Color				Background{ 1.f, 1.f, 1.f };
+		static constexpr Color			Background{ 1.f, 1.f, 1.f };
 		static constexpr float			Gap = 0.02f;			// 사각형 사이 최소 간격
 		static constexpr float			EraserSize = Rect::Size * 2.f;
 		static constexpr float			GrowRate = 10.f;		// 초당 남은 차이의 비율

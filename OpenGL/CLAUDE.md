@@ -32,9 +32,9 @@ Engine/Math       Vec2(glm 래핑·Approach), Bounds(AABB), Easing
 Engine/World      World(한 판 전체: 조립·조회·Each), Entity(번호표 손잡이), EntityTable(생존·세대·Flush),
                   ComponentPools(타입별 SparseSet 저장소), Transform(pos·size)
 Engine/Movement   Mover, IMovementMode(ZigZag·Follow·EdgePatrol), MovementSystem
-Engine/Effect     IEffect·EffectStack·Playback, Effects(ScalePulse·ColorCycle·ScaleIn), EffectSystem
+Engine/Effect     IEffect·EffectStack·Playback, Effects(ScalePulse·ColorCycle·ColorFade·ScaleIn), EffectSystem
 Engine/Collision  CollisionSystem(경계·Separate·FindContacts, Trigger), ContactTracker(Enter/Stay/Exit)
-Engine/Render     Color(HSV·RandomColor), IRenderer, FirstRenderer(고정 파이프라인), Visual, RenderSystem
+Engine/Render     Color(HSV·RandomColor·Lerp), IRenderer, FirstRenderer(고정 파이프라인), Visual, RenderSystem
 Engine/Platform   App(창·루프·입력), Input
 ```
 
