@@ -27,7 +27,7 @@ Subject/NN        과제별 앱과 게임 쪽 컴포넌트 (네임스페이스 a
 Template          새 과제 시작용 뼈대
 Tests             EngineTests: World(ECS) 동작 고정. 컴포넌트를 다른 모듈에서 Add하는 경우 포함
 Engine/Core       Check(HS_DCHECK 매크로 Check.h + 실패 처리), Random, TypeId(이름 해시·타입 순번), SparseSet,
-                  Enums(EnumToString·StringToEnum·EnumCount), Text(Format)
+                  Enums(EnumToString·StringToEnum·EnumCount), Fields(Describe: 필드를 "이름=값" 한 줄로), Text(Format)
 Engine/Math       Vec2(glm 래핑·Approach), Bounds(AABB), Easing
 Engine/World      World(한 판 전체: 조립·조회·Each), Entity(번호표 손잡이), EntityTable(생존·세대·Flush),
                   ComponentPools(타입별 SparseSet 저장소), Transform(pos·size)

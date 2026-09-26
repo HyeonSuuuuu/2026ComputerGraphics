@@ -10,6 +10,7 @@ export import hs.transform;
 export import hs.color;
 export import hs.random;
 export import hs.enums;
+export import hs.fields;
 export import hs.text;
 export import hs.input;
 export import hs.renderer;

@@ -4,6 +4,7 @@ import std;
 import engine_test.expect;
 import engine_test.world;
 import engine_test.enums;
+import engine_test.fields;
 import engine_test.text;
 import engine_test.type_id;
 
@@ -11,6 +12,7 @@ int main()
 {
 	RunWorldTests();
 	RunEnumsTests();
+	RunFieldsTests();
 	RunTextTests();
 	RunTypeIdTests();
 

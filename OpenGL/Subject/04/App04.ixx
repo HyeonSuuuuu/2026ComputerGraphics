@@ -20,8 +20,6 @@ export namespace app04
 		{
 			// 맵 범위가 화면과 다를 때만
 			// _world.SetBounds({ .min{ -1.f, -1.f }, .max{ 1.f, 1.f } });
-
-			UpdateStatus();
 		}
 
 	protected:
@@ -37,9 +35,9 @@ export namespace app04
 					Entity entity = Rect::Spawn(_world, input.MousePos());
 					Mover* mover = entity.Get<Mover>();
 					ApplyMotion(entity);
-					SetEffect<ScalePulse>(entity, _pulsing);
-					SetEffect<ColorCycle>(entity, _coloring);
-					mover->enabled = _moving;
+					SetEffect<ScalePulse>(entity, _settings.pulsing);
+					SetEffect<ColorCycle>(entity, _settings.coloring);
+					mover->enabled = _settings.moving;
 				}
 			}
 
@@ -49,18 +47,17 @@ export namespace app04
 					if (!input.IsKeyPressed(key))
 						return;
 
-					if (_motion == motion)
+					if (_settings.motion == motion)
 					{
-						_moving = !_moving;
+						_settings.moving = !_settings.moving;
 						ApplyEnabled();
 					}
 					else
 					{
-						_motion = motion;
-						_moving = true;
+						_settings.motion = motion;
+						_settings.moving = true;
 						ApplyMotion();
 					}
-					UpdateStatus();
 				};
 
 			motionKey(GLFW_KEY_1, Motion::Diagonal);
@@ -70,26 +67,25 @@ export namespace app04
 			
 			if (input.IsKeyPressed(GLFW_KEY_4))
 			{
-				_pulsing = !_pulsing;
+				_settings.pulsing = !_settings.pulsing;
 				for (Entity entity : _world.Entities())
-					SetEffect<ScalePulse>(entity, _pulsing);
+					SetEffect<ScalePulse>(entity, _settings.pulsing);
 			}
 			
 			if (input.IsKeyPressed(GLFW_KEY_5))
 			{
-				_coloring = !_coloring;
+				_settings.coloring = !_settings.coloring;
 				for (Entity entity : _world.Entities())
-					SetEffect<ColorCycle>(entity, _coloring);
+					SetEffect<ColorCycle>(entity, _settings.coloring);
 			}
 			
 			if (input.IsKeyPressed(GLFW_KEY_S))
 			{
-				_moving = false;
-				_pulsing = false;
-				_coloring = false;
+				_settings.moving = false;
+				_settings.pulsing = false;
+				_settings.coloring = false;
 
 				ApplyEnabled();
-				UpdateStatus();
 				for (Entity entity : _world.Entities())
 				{
 					SetEffect<ScalePulse>(entity, false);
@@ -110,6 +106,8 @@ export namespace app04
 			EffectSystem::Tick(_world, dt);
 			MovementSystem::Tick(_world, dt);
 			CollisionSystem::Tick(_world);
+
+			ShowSettings();
 		}
 
 		void Render() override
@@ -121,6 +119,15 @@ export namespace app04
 
 	private:
 		enum class Motion { Diagonal, ZigZag, EdgePatrol, Home };
+
+		// 창 제목에 필드 이름 그대로 나옴(Describe) → 여기 추가하면 제목에도 뜸
+		struct Settings
+		{
+			Motion motion = Motion::Diagonal;
+			bool moving = false;
+			bool pulsing = false;
+			bool coloring = false;
+		};
 		
 		void ApplyMotion(Entity entity)
 		{
@@ -128,7 +135,7 @@ export namespace app04
 			if (!mover)
 				return;
 
-			switch (_motion)
+			switch (_settings.motion)
 			{
 			case Motion::Diagonal:
 				mover->SetMode(nullptr);				// 모드 없음 = 등속 직선
@@ -159,7 +166,7 @@ export namespace app04
 				break;
 			}
 
-			mover->enabled = _moving;
+			mover->enabled = _settings.moving;
 		}
 
 		void ApplyMotion()
@@ -194,21 +201,24 @@ export namespace app04
 		{
 			for (Entity entity : _world.Entities())
 				if (Mover* mover = entity.Get<Mover>())
-					mover->enabled = _moving;
+					mover->enabled = _settings.moving;
 		}
 
-		// 모드·정지가 바뀔 때만 부름: 창 제목 변경은 운영체제 호출
-		void UpdateStatus()
+		// 디버그 표시. 창 제목 변경은 운영체제 호출이라 글자가 바뀔 때만
+		// 나중에 화면 글자로 옮기면 매 프레임 그리니 비교가 필요 없어짐
+		void ShowSettings()
 		{
-			SetStatus(Format("{}{}", EnumToString(_motion), _moving ? "" : " (정지)"));
+			std::string status = Describe(_settings);
+			if (status == _shownStatus)
+				return;
+			_shownStatus = std::move(status);
+			SetStatus(_shownStatus);
 		}
 
 
 		World							_world;
-		Motion							_motion = Motion::Diagonal;
-		bool							_moving = false;
-		bool							_pulsing = false;
-		bool							_coloring = false;
+		Settings						_settings;
+		std::string						_shownStatus;
 		static constexpr std::uint32_t		MaxSpawnRect = 5;
 		static constexpr float			ZigZagInterval = 0.3f;
 	};
