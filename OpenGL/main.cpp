@@ -6,12 +6,13 @@ import std;
 import app04;
 import app05;
 import app06;
+import lesson.hello_triangle;
 
 int main()
 {
 	try
 	{
-		app06::App06 app(800, 600);
+		lesson::HelloTriangle app(800, 600);
 		app.Run();
 	}
 	catch (const std::exception& e)

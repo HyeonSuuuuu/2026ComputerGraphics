@@ -53,7 +53,7 @@ target_link_libraries(Engine PUBLIC OpenGL::GL glfw GLEW::GLEW glm::glm stdc++ex
 
 # ── 게임 ───────────────────────────────────────────────────────────────────
 add_executable(OpenGL main.cpp)
-hs_add_modules(OpenGL Subject/*.ixx Template/*.ixx)
+hs_add_modules(OpenGL Subject/*.ixx Template/*.ixx Lessons/*.ixx)
 target_link_libraries(OpenGL PRIVATE Engine)
 hs_runnable(OpenGL)
 
