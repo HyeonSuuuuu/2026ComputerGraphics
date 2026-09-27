@@ -3,7 +3,7 @@ module;
 #include <GLFW/glfw3.h>
 
 // learnopengl.com — Getting started / Hello Triangle
-// 1: 삼각형(VBO+VAO)   2: 사각형(EBO)   W: 와이어프레임
+// 1: 삼각형 2개(VAO 하나)   2: 사각형(EBO)   3: VAO 두 쌍 + 노란 프로그램   W: 와이어프레임
 export module lesson.hello_triangle;
 
 import std;
@@ -13,61 +13,16 @@ using namespace hs;
 
 namespace lesson
 {
-	const char* VertexShaderSource = R"(
-		#version 330 core
-		layout (location = 0) in vec3 aPos;
-		void main()
-		{
-			gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-		}
-	)";
-
-	const char* FragmentShaderSource = R"(
-		#version 330 core
-		out vec4 FragColor;
-		void main()
-		{
-			FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-		}
-	)";
-	
-	const char* FragmentShader2Source = R"(
-		#version 330 core
-		out vec4 FragColor;
-		void main()
-		{
-			FragColor = vec4(1.f, 1.f, 0.f, 1.f);
-		}
-	)";
-
-	GLuint CompileShader(GLenum type, const char* source)
-	{
-		GLuint shader = glCreateShader(type);
-		glShaderSource(shader, 1, &source, nullptr);
-		glCompileShader(shader);
-
-		int success;
-		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-		if (!success) {
-			char infoLog[512];
-			glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-			std::cout << Format("셰이더 컴파일 실패:\n{}\n", infoLog);
-		}
-		return shader;
-	}
-	
-	void LinkProgram(GLuint program)
-	{
-		glLinkProgram(program);
-			
-		int success;
-		glGetProgramiv(program, GL_LINK_STATUS, &success);
-		if (!success) {
-			char infoLog[512];
-			glGetProgramInfoLog(program, 512, nullptr, infoLog);
-			std::cout << Format("셰이더 링크 실패:\n{}\n", infoLog);
-		}
-	}
+	// 셰이더 파일은 ASCII만 (hs.modern_renderer 참고)
+	constexpr char VertexSource[] = {
+#embed "Shaders/HelloTriangle.vert"
+		, 0 };
+	constexpr char OrangeSource[] = {
+#embed "Shaders/Orange.frag"
+		, 0 };
+	constexpr char YellowSource[] = {
+#embed "Shaders/Yellow.frag"
+		, 0 };
 }
 
 export namespace lesson
@@ -78,27 +33,9 @@ export namespace lesson
 	public:
 		HelloTriangle(int width, int height)
 			: Super(width, height)
+			, _orange(VertexSource, OrangeSource)
+			, _yellow(VertexSource, YellowSource)
 		{
-			// ── 셰이더 프로그램 ──
-			GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, VertexShaderSource);
-			GLuint fragmentShader = CompileShader(GL_FRAGMENT_SHADER, FragmentShaderSource);
-			GLuint fragmentShaderYellow = CompileShader(GL_FRAGMENT_SHADER, FragmentShader2Source);
-			
-			_shaderProgram = glCreateProgram();
-			glAttachShader(_shaderProgram, vertexShader);
-			glAttachShader(_shaderProgram, fragmentShader);
-			LinkProgram(_shaderProgram);
-			
-			_shaderYellowProgram = glCreateProgram();
-			glAttachShader(_shaderYellowProgram, vertexShader);
-			glAttachShader(_shaderYellowProgram, fragmentShaderYellow);
-			LinkProgram(_shaderYellowProgram);
-			
-			// 프로그램에 링크된 뒤엔 필요 없음
-			glDeleteShader(vertexShader);
-			glDeleteShader(fragmentShader);
-			glDeleteShader(fragmentShaderYellow);
-
 			// ── 삼각형: VAO가 아래 VBO 연결과 속성 설정을 기억 ──
 			float triangle[] = {
 				-0.5f, -0.5f, 0.0f,
@@ -171,8 +108,6 @@ export namespace lesson
 			glDeleteVertexArrays(1, &_rectVao);
 			glDeleteBuffers(1, &_rectVbo);
 			glDeleteBuffers(1, &_rectEbo);
-			glDeleteProgram(_shaderProgram);
-			glDeleteProgram(_shaderYellowProgram);
 		}
 
 	protected:
@@ -205,7 +140,7 @@ export namespace lesson
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			glUseProgram(_shaderProgram);
+			_orange.Use();
 			if (_showRect) {
 				glBindVertexArray(_rectVao);
 				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -214,7 +149,7 @@ export namespace lesson
 			{
 				glBindVertexArray(_vaos[0]);
 				glDrawArrays(GL_TRIANGLES, 0, 3);
-				glUseProgram(_shaderYellowProgram);
+				_yellow.Use();
 				glBindVertexArray(_vaos[1]);
 				glDrawArrays(GL_TRIANGLES, 0, 3);
 			}
@@ -227,8 +162,8 @@ export namespace lesson
 		}
 
 	private:
-		GLuint _shaderProgram{}, _shaderYellowProgram{};
-		GLuint _vaos[2], _vbos[2];
+		Shader _orange, _yellow;	// 셰이더 프로그램은 Shader 소멸자가 지움
+		GLuint _vaos[2]{}, _vbos[2]{};
 		GLuint _rectVao{}, _rectVbo{}, _rectEbo{};
 		bool _showRect = false;
 		bool _wireframe = false;
