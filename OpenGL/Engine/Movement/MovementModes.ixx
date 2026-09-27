@@ -12,31 +12,111 @@ export namespace hs
 {
 	// mode 없음(nullptr) = 등속 직선
 
-	// 가로 진행·경계 반사는 시스템 담당
-	class ZigZagMode final : public IMovementMode
+	// 잔디 깎기: 가로로 벽까지 → step만큼 세로로 → 반대 가로로 벽까지 → … 위·아래 벽에 닿으면 세로 방향을 뒤집음
+	// 벽 위치는 모름. BoundsResponse::Reflect가 뒤집은 방향 부호로 "닿았다"를 앎 → Reflect와 함께 쓸 것
+	class SweepMode final : public IMovementMode
 	{
 	public:
-		explicit ZigZagMode(float interval) : _interval(interval)
+		explicit SweepMode(float step, float verticalSign = -1.f) : _step(step), _verticalSign(verticalSign)
 		{
-			HS_DCHECK(interval > 0.f, "간격이 0 이하면 방향이 매 프레임 뒤집힌다");
+			HS_DCHECK(step > 0.f, "한 칸이 0이면 세로로 안 움직인다");
 		}
 
 		void CalcVelocity(Velocity& velocity, const Transform&, float dt) override
 		{
-			if (_interval <= 0.f)
+			if (!_started) {
+				_horizontalSign = velocity.dir.x < 0.f ? -1.f : 1.f;
+				velocity.dir = { _horizontalSign, 0.f };
+				_started = true;
 				return;
+			}
 
-			_timer += dt;
-			while (_timer >= _interval)
-			{
-				_timer -= _interval;
-				velocity.dir.y = -velocity.dir.y;
+			if (!_stepping) {
+				if (velocity.dir.x * _horizontalSign < 0.f) {	// 옆 벽에서 반사됨
+					_horizontalSign = -_horizontalSign;
+					_stepping = true;
+					_stepLeft = _step;
+					velocity.dir = { 0.f, _verticalSign };
+				}
+				return;
+			}
+
+			if (velocity.dir.y * _verticalSign < 0.f) {			// 위·아래 벽에서 반사됨 → 이후로는 반대로
+				_verticalSign = -_verticalSign;
+				_stepLeft = 0.f;
+			}
+			else
+				_stepLeft -= velocity.speed * dt;
+
+			if (_stepLeft <= 0.f) {
+				_stepping = false;
+				velocity.dir = { _horizontalSign, 0.f };
 			}
 		}
 
 	private:
-		float _interval;
-		float _timer{};
+		float _step;
+		float _verticalSign;
+		float _horizontalSign = 1.f;
+		float _stepLeft{};
+		bool _stepping{};
+		bool _started{};
+	};
+
+	// 점들을 직선으로 이은 경로를 speed로 따라감. 끝에 닿으면 되돌아옴(왕복)
+	// 경로 첫 점에서 시작해야 튀지 않음. 속력은 모드가 정함 → 다른 모드로 바꿀 때 speed를 다시 줄 것
+	class PathMode final : public IMovementMode
+	{
+	public:
+		PathMode(std::vector<Vec2> points, float speed) : _points(std::move(points)), _speed(speed)
+		{
+			HS_DCHECK(_points.size() >= 2, "점이 둘은 있어야 경로");
+			HS_DCHECK(speed > 0.f, "속도가 0이면 제자리에 선다");
+			_lengths.push_back(0.f);	// _lengths[i] = 처음부터 i번 점까지 거리
+			for (std::size_t i = 1; i < _points.size(); ++i)
+				_lengths.push_back(_lengths.back() + Length(_points[i] - _points[i - 1]));
+		}
+
+		void CalcVelocity(Velocity& velocity, const Transform& transform, float dt) override
+		{
+			if (dt <= 0.f)
+				return;
+
+			const float total = _lengths.back();
+			_s += _speed * dt * (_forward ? 1.f : -1.f);
+			// 끝을 넘어간 만큼은 되돌아온 거리로. 끝에 세워 두면 왕복마다 한 프레임씩 늦어짐
+			if (_s > total) {
+				_s = std::max(2.f * total - _s, 0.f);
+				_forward = false;
+			}
+			else if (_s < 0.f) {
+				_s = std::min(-_s, total);
+				_forward = true;
+			}
+
+			// 다음 점까지의 속도 역산 (EdgePatrolMode와 같은 방식) → 꺾이는 점을 지나쳐도 경로 위
+			Vec2 offset = PointAt(_s) - transform.pos;
+			velocity.dir = Normalize(offset);
+			velocity.speed = Length(offset) / dt;
+		}
+
+	private:
+		Vec2 PointAt(float s) const
+		{
+			auto next = std::upper_bound(_lengths.begin(), _lengths.end(), s);
+			if (next == _lengths.end())
+				return _points.back();
+			std::size_t i = static_cast<std::size_t>(next - _lengths.begin());	// s는 i-1번과 i번 점 사이
+			float segment = _lengths[i] - _lengths[i - 1];
+			float t = segment > 0.f ? (s - _lengths[i - 1]) / segment : 0.f;
+			return _points[i - 1] + (_points[i] - _points[i - 1]) * t;
+		}
+
+		std::vector<Vec2> _points;
+		std::vector<float> _lengths;
+		float _speed;
+		float _s{};
+		bool _forward = true;
 	};
 
 	// 시계방향. s 간격을 벌려두면 줄지어 이동

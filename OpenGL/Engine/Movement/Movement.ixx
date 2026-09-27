@@ -27,6 +27,12 @@ export namespace hs
 		Wrap,
 		Clamp,
 	};
+
+	// 월드 경계 대신 이 범위에 가둠(반응은 Mover::boundsResponse). Mover가 있어야 적용
+	struct Confine
+	{
+		Bounds bounds;
+	};
 	
 	class IMovementMode
 	{
@@ -45,6 +51,7 @@ export namespace hs
 		Velocity velocity;
 		BoundsResponse boundsResponse{ BoundsResponse::Reflect };
 		bool enabled{ true };
+		bool hitBounds{};	// 이번 CollisionSystem::Tick에서 경계에 걸림(밀림·튕김·넘어감). 매 Tick 새로 씀
 
 		std::unique_ptr<IMovementMode> mode;
 

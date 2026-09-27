@@ -8,6 +8,8 @@ import engine_test.fields;
 import engine_test.effect;
 import engine_test.text;
 import engine_test.type_id;
+import engine_test.collision;
+import engine_test.movement;
 
 int main()
 {
@@ -17,6 +19,8 @@ int main()
 	RunEffectTests();
 	RunTextTests();
 	RunTypeIdTests();
+	RunCollisionTests();
+	RunMovementTests();
 
 	int failures = engine_test::Failures();
 	std::cout << '\n' << (failures == 0 ? "전부 통과" : "실패 있음") << '\n';

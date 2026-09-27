@@ -33,10 +33,11 @@ export namespace hs
 
 		static void Tick(World& world)
 		{
-			const Bounds bounds = world.WorldBounds();
-			world.Each<Mover, Transform>([bounds](Entity, Mover& mover, Transform& transform)
+			const Bounds worldBounds = world.WorldBounds();
+			world.Each<Mover, Transform>([worldBounds](Entity entity, Mover& mover, Transform& transform)
 				{
-					ResolveBounds(transform, mover.velocity, mover.boundsResponse, bounds);
+					const Confine* confine = entity.Get<Confine>();
+					mover.hitBounds = ResolveBounds(transform, mover.velocity, mover.boundsResponse, confine ? confine->bounds : worldBounds);
 				});
 		}
 
@@ -87,10 +88,13 @@ export namespace hs
 
 		static constexpr int AxisCount = 2;
 
-		static void ResolveBounds(Transform& transform, Velocity& velocity, BoundsResponse response, const Bounds& bounds)
+		// 경계 때문에 무언가 했으면(또는 경계보다 커서 못 했으면) true
+		static bool ResolveBounds(Transform& transform, Velocity& velocity, BoundsResponse response, const Bounds& bounds)
 		{
 			if (response == BoundsResponse::None)
-				return;
+				return false;
+
+			bool hit = false;
 
 			Vec2 half = transform.size / 2.f;
 
@@ -99,17 +103,23 @@ export namespace hs
 				if (response == BoundsResponse::Wrap)
 				{
 					// 완전히 빠져나간 뒤 이동. 걸치자마자 옮기면 튐
-					if (transform.pos[axis] + half[axis] < bounds.min[axis])
+					if (transform.pos[axis] + half[axis] < bounds.min[axis]) {
 						transform.pos[axis] = bounds.max[axis] + half[axis];
-					else if (transform.pos[axis] - half[axis] > bounds.max[axis])
+						hit = true;
+					}
+					else if (transform.pos[axis] - half[axis] > bounds.max[axis]) {
 						transform.pos[axis] = bounds.min[axis] - half[axis];
+						hit = true;
+					}
 					continue;
 				}
 
 				float low = bounds.min[axis] + half[axis];		// 중심의 허용 범위
 				float high = bounds.max[axis] - half[axis];
-				if (low > high)									// 경계보다 큰 사각형: 밀 곳 없음
+				if (low > high) {								// 경계보다 큰 사각형: 밀 곳 없음
+					hit = true;
 					continue;
+				}
 
 				bool reflect = (response == BoundsResponse::Reflect);
 
@@ -118,13 +128,16 @@ export namespace hs
 					transform.pos[axis] = low;
 					// 부호 반전 대신 안쪽 고정: 한 프레임에 못 빠져나와도 끼임 없음
 					if (reflect) velocity.dir[axis] = std::abs(velocity.dir[axis]);
+					hit = true;
 				}
 				else if (transform.pos[axis] > high)
 				{
 					transform.pos[axis] = high;
 					if (reflect) velocity.dir[axis] = -std::abs(velocity.dir[axis]);
+					hit = true;
 				}
 			}
+			return hit;
 		}
 	};
 }

@@ -24,17 +24,21 @@ MSVC 프로젝트(`.slnx`·`.vcxproj`)는 제거됨 — 필요하면 git 기록�
 CMakeLists.txt    Engine(정적 라이브러리) + OpenGL(게임: Subject·Template) + EngineTests
 main.cpp          실행할 과제 앱 선택
 Subject/NN        과제별 앱과 게임 쪽 컴포넌트 (네임스페이스 appNN)
-Template          새 과제 시작용 뼈대
+Template          새 과제 시작용 뼈대(AppNN.ixx). 복사하면 → 복사본 안에서 먼저 NN을 과제 번호로 바꾸기(찾아 바꾸기) → 파일 이름 변경.
+                  복사 직후엔 AppNN이 두 개라 Rider의 이름 변경이 템플릿 쪽을 바꿔 버린 적 있음
+Lessons           learnopengl.com 장별 실행본(LearnOpenGL/, 네임스페이스 lesson)
 Tests             EngineTests: World(ECS) 동작 고정. 컴포넌트를 다른 모듈에서 Add하는 경우 포함
 Engine/Core       Check(HS_DCHECK 매크로 Check.h + 실패 처리), Random, TypeId(이름 해시·타입 순번), SparseSet,
                   Enums(EnumToString·StringToEnum·EnumCount), Fields(Describe: 필드를 "이름=값" 한 줄로), Text(Format)
 Engine/Math       Vec2(glm 래핑·Approach), Bounds(AABB), Easing
 Engine/World      World(한 판 전체: 조립·조회·Each), Entity(번호표 손잡이), EntityTable(생존·세대·Flush),
                   ComponentPools(타입별 SparseSet 저장소), Transform(pos·size)
-Engine/Movement   Mover, IMovementMode(ZigZag·Follow·EdgePatrol), MovementSystem
+Engine/Movement   Mover(hitBounds: 이번 Tick에 경계에 걸림), Confine(도형별 경계. 없으면 월드 경계), IMovementMode(Sweep·Path·Follow·EdgePatrol), MovementSystem
 Engine/Effect     IEffect·EffectStack·Playback, Effects(ScalePulse·ColorCycle·ColorFade·ScaleIn), EffectSystem
 Engine/Collision  CollisionSystem(경계·Separate·FindContacts, Trigger), ContactTracker(Enter/Stay/Exit)
-Engine/Render     Color(HSV·RandomColor·Lerp), IRenderer, FirstRenderer(고정 파이프라인), Visual, RenderSystem
+Engine/Render     Color(HSV·RandomColor·Lerp), Shape(단위 도형 꼭짓점), IRenderer,
+                  FirstRenderer(고정 파이프라인·사각형만, App04~06 기본값), ModernRenderer(셰이더, App07부터·Template),
+                  Shader(프로그램 RAII·uniform), Shaders/(GLSL: 칠하는 방식별 Solid 등), Visual(색·모양), RenderSystem
 Engine/Platform   App(창·루프·입력), Input
 ```
 
@@ -71,6 +75,8 @@ Flush가 시스템보다 앞: 이번 프레임에 만든 것도 바로 시스템
   이름은 리플렉션으로 타입을 분해해 조립(`Tween<const app04::Home*>`까지). 통째로 `display_string_of`를 쓰면 안 됨:
   GCC가 import한 쪽에서만 `@모듈`을 붙여, 정의한 모듈과 쓰는 모듈의 ID가 달라진다(`Get`이 조용히 nullptr).
   배열·함수 타입·volatile·enum 값 인자·익명 네임스페이스 타입은 컴파일 에러 → 필요해지면 `Name()`에 규칙 추가.
+- **셰이더는 `.vert`·`.frag` 파일을 `#embed`로 박아 넣는다** (`ModernRenderer.ixx`). 실행 폴더와 무관하고 ninja가 파일 변경을 추적.
+  셰이더 파일은 ASCII만(GLSL 3.30은 UTF-8 주석 미보장) — 한글을 넣으면 `char` 배열에서 narrowing 에러. 설명 주석은 C++ 쪽에.
 - `switch`에서 일부러 흘릴 때는 `[[fallthrough]];`.
 - **모듈 간 전방 선언 불가.** `friend class X;`는 X를 선언한 모듈 소속으로 만든다 → 같은 모듈이어야 함. `Entity`와 `World`가 한 파일인 이유이기도 함.
 - **모듈 인터페이스의 `inline` 함수 안 `static` 금지.** GCC가 import한 파일마다 따로 만들어 링크 충돌(`NextTypeIndex` 주석). `inline` 없이 정의하면 한 곳에만 생긴다.

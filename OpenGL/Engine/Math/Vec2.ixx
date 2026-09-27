@@ -22,6 +22,7 @@ export namespace hs
 	float LengthSq(Vec2 v) { return glm::dot(v, v); }
 	float Length(Vec2 v) { return glm::length(v); }
 	Vec2 Abs(Vec2 v) { return glm::abs(v); }
+	Vec2 Max(Vec2 a, Vec2 b) { return glm::max(a, b); }	// 성분별
 
 	Vec2 Normalize(Vec2 v)
 	{
