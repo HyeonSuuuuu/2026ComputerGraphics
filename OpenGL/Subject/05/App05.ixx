@@ -183,4 +183,7 @@ export namespace app05
 		
 		
 	};
+
+	// main에서 과제 번호만 바꾸면 되게: app09::App. 클래스 이름을 App으로 하면 hs::App과 겹침
+	using App = App05;
 }

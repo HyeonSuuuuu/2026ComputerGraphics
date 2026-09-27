@@ -59,10 +59,10 @@ export namespace app06
 	private:
 		enum class Motion
 		{
-			Cross,		// ① 상하좌우로 흩어짐
-			Diagonal,	// ② 대각선으로 흩어짐
-			Together,	// ③ 넷이 같은 방향으로
-			EightWay,	// ④ 8조각이 8방향으로
+			Cross,		// 1
+			Diagonal,	// 2
+			Together,	// 3
+			EightWay,	// 4
 		};
 
 		// offset: 원본 크기 대비 조각 중심 위치
@@ -80,8 +80,8 @@ export namespace app06
 
 		static SplitPattern PatternOf(Motion motion)
 		{
-			constexpr Vec2 TopLeft{ -0.25f, 0.25f }, TopRight{ 0.25f, 0.25f };
-			constexpr Vec2 BottomLeft{ -0.25f, -0.25f }, BottomRight{ 0.25f, -0.25f };
+			constexpr Vec2 TopLeft{ -0.1f, 0.1f }, TopRight{ 0.1f, 0.1f };
+			constexpr Vec2 BottomLeft{ -0.1f, -0.1f }, BottomRight{ 0.1f, -0.1f };
 
 			switch (motion)
 			{
@@ -151,4 +151,7 @@ export namespace app06
 
 		static constexpr Color		Background{ 1.f, 1.f, 1.f };
 	};
+
+	// main에서 과제 번호만 바꾸면 되게: app09::App. 클래스 이름을 App으로 하면 hs::App과 겹침
+	using App = App06;
 }

@@ -144,9 +144,10 @@ export namespace app04
 				break;
 
 			case Motion::ZigZag:
-				mover->SetMode(std::make_unique<ZigZagMode>(ZigZagInterval));
+				// 가로로 벽까지 → 한 칸(사각형 크기) 아래 → 반대로… 바닥에 닿으면 위로. 벽 감지는 Reflect에 기댐
+				mover->SetMode(std::make_unique<SweepMode>(Rect::Size));
 				mover->boundsResponse = BoundsResponse::Reflect;
-				mover->velocity = { .dir = { 1.f, 0.f }, .speed = Rect::Speed };
+				mover->velocity = { .dir = { Random(0, 1) ? 1.f : -1.f, 0.f }, .speed = Rect::Speed };
 				break;
 
 			case Motion::Home:
@@ -220,6 +221,8 @@ export namespace app04
 		Settings						_settings;
 		std::string						_shownStatus;
 		static constexpr std::uint32_t		MaxSpawnRect = 5;
-		static constexpr float			ZigZagInterval = 0.3f;
 	};
+
+	// main에서 과제 번호만 바꾸면 되게: app09::App. 클래스 이름을 App으로 하면 hs::App과 겹침
+	using App = App04;
 }
