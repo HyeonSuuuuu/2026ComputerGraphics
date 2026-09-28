@@ -147,7 +147,6 @@ export namespace app08
 		static constexpr float		TallRatio = 1.6f;		// 세로가 가로의 1.6배. 크기를 바꿔도 비율 유지(곱하기라서)
 		static constexpr float		ResizePerSecond = 1.5f;	// 1초에 1.5배로 커지거나 1.5분의 1로 줄어듦
 	};
-
-	// main에서 과제 번호만 바꾸면 되게: app09::App. 클래스 이름을 App으로 하면 hs::App과 겹침
+	
 	using App = App08;
 }

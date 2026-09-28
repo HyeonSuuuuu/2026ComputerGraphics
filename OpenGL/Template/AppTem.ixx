@@ -10,11 +10,11 @@ using namespace hs;
 
 export namespace appNN
 {
-	class AppNN : public App
+	class AppTem : public App
 	{
 		using Super = App;
 	public:
-		AppNN(int width, int height)
+		AppTem(int width, int height)
 			: Super(width, height, [] { return std::make_unique<ModernRenderer>(); })
 		{
 			// 맵 범위가 화면과 다를 때만
@@ -61,5 +61,5 @@ export namespace appNN
 	};
 
 	// main에서 과제 번호만 바꾸면 되게: app09::App. 클래스 이름을 App으로 하면 hs::App과 겹침
-	using App = AppNN;
+	using App = AppTem;
 }
