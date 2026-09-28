@@ -9,13 +9,13 @@ import app06;
 import app07;
 import app08;
 import app09;
-
+import app10;
 
 int main()
 {
 	try
 	{
-		app06::App app(800, 600);
+		app09::App app(800, 600);
 		app.Run();
 	}
 	catch (const std::exception& e)
